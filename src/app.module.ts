@@ -14,8 +14,12 @@ AdminJS.registerAdapter({ Database, Resource });
 @Module({
     imports: [
         TypeOrmModule.forRoot({
-            type: 'sqlite',
-            database: './mydb.sql',
+            type: 'mysql',
+            host: '10.11.2.164',
+            port: 3306,
+            username: 'root',
+            password: '123456',
+            database: 'zzh',
             autoLoadEntities: true,
             // entities: [],
             synchronize: true,
