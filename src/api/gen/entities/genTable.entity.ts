@@ -1,10 +1,10 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
-    Index,
     BaseEntity,
     OneToMany,
 } from 'typeorm';
@@ -22,25 +22,28 @@ export class GenTableEntity extends BaseEntity {
     /**
      * 表名称
      */
-    @Index({ unique: true })
     @Column({ unique: true })
+    
     entityName: string;
 
     /**
      * 表描述
      */
     @Column()
+    
     desc: string;
     /**
      * 备注
      */
     @Column({ nullable: true })
+    
     remark?: string;
 
     /**
      * 创建时间
      */
     @CreateDateColumn()
+    
     createdAt: Date;
     /**
      * 修改时间
@@ -49,5 +52,7 @@ export class GenTableEntity extends BaseEntity {
     updatedAt: Date;
 
     @OneToMany(() => GenColumnsEntity, column => column.table)
+    @ApiProperty({ type: () => Array<GenColumnsEntity> })
+
     columns: GenColumnsEntity[];
 }

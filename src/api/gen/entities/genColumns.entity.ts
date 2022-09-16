@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
     Entity,
     Column,
@@ -7,6 +8,7 @@ import {
     Index,
     BaseEntity,
     ManyToOne,
+    JoinColumn,
 } from 'typeorm';
 import { GenTableEntity } from './genTable.entity';
 export enum ColumnsType {
@@ -15,6 +17,7 @@ export enum ColumnsType {
     boolean = 'boolean',
     Date = 'Date',
 }
+
 /**
  * 代码生成字段表
  */
@@ -23,8 +26,10 @@ export class GenColumnsEntity extends BaseEntity {
     /**
      * id
      */
+
     @PrimaryGeneratedColumn()
     id: number;
+    
     /**
      * 字段名称
      */
@@ -46,27 +51,37 @@ export class GenColumnsEntity extends BaseEntity {
     /**
      * 插入
      */
-    @Column()
+    @Column({
+        default: false,
+    })
     isInsert: boolean;
     /**
      * 编辑
      */
-    @Column()
+    @Column({
+        default: false,
+    })
     isEdit: boolean;
     /**
      * 列表
      */
-    @Column()
+    @Column({
+        default: false,
+    })
     isList: boolean;
     /**
      * 查询
      */
-    @Column()
+    @Column({
+        default: false,
+    })
     isQuery: boolean;
     /**
      * 必填
      */
-    @Column()
+    @Column({
+        default: false,
+    })
     required: boolean;
 
     /**
@@ -83,5 +98,12 @@ export class GenColumnsEntity extends BaseEntity {
      * 表信息
      */
     @ManyToOne(() => GenTableEntity, table => table.columns)
+    @JoinColumn({ name: 'tableId' })
+    @ApiProperty({ type: () => GenTableEntity })
     table: GenTableEntity;
+    /**
+     * 表id
+     */
+    @Column({ name: 'tableId' })
+    tableId: number;
 }
