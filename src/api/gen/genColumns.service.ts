@@ -5,9 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 @Injectable()
 export class GenColumnsService {
-    constructor(
-        @InjectRepository(GenColumnsEntity) private genColumnsRepository: Repository<GenColumnsEntity>
-    ) {}
+    constructor(@InjectRepository(GenColumnsEntity) private genColumnsRepository: Repository<GenColumnsEntity>) {}
 
     async create(entity: GenColumnsCreateDto) {
         return this.genColumnsRepository.save(entity);

@@ -1,5 +1,4 @@
 import { Limit } from '@common/utils/constants';
-import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ColumnsType } from '../entities/genColumns.entity';
@@ -27,31 +26,26 @@ class GenColumnsListWhereDto {
     /**
      * 编辑
      */
-
     @IsOptional()
     isEdit?: boolean;
     /**
      * 列表
      */
-
     @IsOptional()
     isList?: boolean;
     /**
      * 查询
      */
-
     @IsOptional()
     isQuery?: boolean;
     /**
      * 必填
      */
-
     @IsOptional()
     required?: boolean;
     /**
      * 表id
      */
-
     @IsOptional()
     tableId?: number;
 }

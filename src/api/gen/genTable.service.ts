@@ -16,13 +16,18 @@ export class GenTableService {
     }
     async list(dto: GenTableListDto) {
         const { page = 0, psize = 20 } = dto.limit || {};
-
-        return this.genTableRepository.find({
-            where: dto.where,
-            order: { createdAt: 'DESC' },
-            skip: page * psize,
-            take: psize,
-        });
+        const [data, total] = await Promise.all([
+            this.genTableRepository.find({
+                where: dto.where,
+                order: { createdAt: 'DESC' },
+                skip: page * psize,
+                take: psize,
+            }),
+            this.genTableRepository.count({
+                where: dto.where,
+            }),
+        ]);
+        return { data, total };
     }
     async findById(id: number) {
         const entity = await this.genTableRepository.findOneBy({ id });

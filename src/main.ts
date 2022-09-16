@@ -10,7 +10,7 @@ async function bootstrap() {
     app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/public/' });
     const config = new DocumentBuilder()
         .setTitle('Cats example')
-        .setDescription('The cats API description /docs-json')
+        .setDescription('<a href="/docs-json">/docs-json</a>')
         .setVersion('1.0')
         .addTag('cats')
         .build();

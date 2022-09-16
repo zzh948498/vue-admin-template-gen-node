@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Limit } from '@common/utils/constants';
 import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsUpdateDto } from './dto';
 import { GenColumnsService } from './genColumns.service';
@@ -54,9 +54,9 @@ export class GenColumnsController {
     /**
      * 代码生成字段表详情
      */
-    @Get('/genColumns/details/:id')
     @ApiOperation({ summary: '某个代码生成字段表信息' })
     @ApiROfResponse(GenColumnsEntity)
+    @Get('/genColumns/details/:id')
     async details(@Param('id') id: number) {
         const data = await this.genColumnsService.findById(id);
         return new RDto({ data });
@@ -64,9 +64,9 @@ export class GenColumnsController {
     /**
      * 修改代码生成字段表
      */
-    @Patch('/genColumns/update/:id')
-    @ApiRPrimitiveOfResponse()
     @ApiOperation({ summary: '修改代码生成字段表信息' })
+    @ApiRPrimitiveOfResponse()
+    @Patch('/genColumns/update/:id')
     async update(@Param('id') id: number, @Body() updateGenColumnsDto: GenColumnsUpdateDto) {
         await this.genColumnsService.update(id, updateGenColumnsDto);
         return new RDto();

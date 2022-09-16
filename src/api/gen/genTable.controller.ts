@@ -1,11 +1,15 @@
 import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Limit } from '@common/utils/constants';
 import { GenTableCreateDto, GenTableListDto, GenTableUpdateDto } from './dto';
 import { GenTableService } from './genTable.service';
+import { GenTableEntity } from './entities/genTable.entity';
+import { RDto, RListDto } from '@common/Result.dto';
+import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
 
 @ApiTags('genTable')
 @ApiBearerAuth()
+@ApiExtraModels(GenTableEntity)
 @ApiHeader({
     name: 'Authorization',
     description: 'Custom token',
@@ -17,25 +21,31 @@ export class GenTableController {
      * 新增代码生成信息表
      */
     @ApiOperation({ summary: '新增代码生成信息表' })
+    @ApiROfResponse(GenTableEntity)
     @Post('/genTable/create')
-    create(@Body() createGenTableDto: GenTableCreateDto) {
-        return this.genTableService.create(createGenTableDto);
+    async create(@Body() createGenTableDto: GenTableCreateDto) {
+        const data = await this.genTableService.create(createGenTableDto);
+        return new RDto({ data });
     }
     /**
      * 代码生成信息表列表（query）
      */
     @ApiOperation({ summary: '代码生成信息表列表（query）' })
+    @ApiROfResponse(GenTableEntity, 'array')
     @Post('/genTable/list')
-    queryList(@Body() dto: GenTableListDto) {
-        return this.genTableService.list(dto);
+    async queryList(@Body() dto: GenTableListDto) {
+        const { data, total } = await this.genTableService.list(dto);
+        return new RListDto({ data, total });
     }
     /**
      * 代码生成信息表列表
      */
     @ApiOperation({ summary: '代码生成信息表列表' })
+    @ApiROfResponse(GenTableEntity, 'array')
     @Get('/genTable/list')
-    list(@Query() limit: Limit) {
-        return this.genTableService.list({ limit });
+    async list(@Query() limit: Limit) {
+        const { data, total } = await this.genTableService.list({ limit });
+        return new RListDto({ data, total });
     }
     // @Get('/genTable')
     // findAll() {
@@ -44,30 +54,31 @@ export class GenTableController {
     /**
      * 代码生成信息表详情
      */
-    @Get('/genTable/details/:id')
     @ApiOperation({ summary: '某个代码生成信息表信息' })
-    @ApiResponse({
-        status: 200,
-        // description: 'The found record',
-        // type: GetGenTableInfoResult,
-    })
-    details(@Param('id') id: number) {
-        return this.genTableService.findById(id);
+    @ApiROfResponse(GenTableEntity)
+    @Get('/genTable/details/:id')
+    async details(@Param('id') id: number) {
+        const data = await this.genTableService.findById(id);
+        return new RDto({ data });
     }
     /**
      * 修改代码生成信息表
      */
-    @Patch('/genTable/update/:id')
     @ApiOperation({ summary: '修改代码生成信息表信息' })
-    update(@Param('id') id: number, @Body() updateGenTableDto: GenTableUpdateDto) {
-        return this.genTableService.update(id, updateGenTableDto);
+    @ApiRPrimitiveOfResponse()
+    @Patch('/genTable/update/:id')
+    async update(@Param('id') id: number, @Body() updateGenTableDto: GenTableUpdateDto) {
+        await this.genTableService.update(id, updateGenTableDto);
+        return new RDto();
     }
     /**
      * 删除代码生成信息表
      */
     @ApiOperation({ summary: '删除代码生成信息表' })
+    @ApiRPrimitiveOfResponse()
     @Delete('/genTable/remove/:id')
-    remove(@Param('id') id: number) {
-        return this.genTableService.delete(id);
+    async remove(@Param('id') id: number) {
+        await this.genTableService.delete(id);
+        return new RDto();
     }
 }
