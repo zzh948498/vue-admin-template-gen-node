@@ -1,20 +1,11 @@
 import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
-import {
-    ApiBearerAuth,
-    ApiExtraModels,
-    ApiHeader,
-    ApiOperation,
-    ApiResponse,
-    ApiTags,
-    getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Limit } from '@common/utils/constants';
 import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsUpdateDto } from './dto';
 import { GenColumnsService } from './genColumns.service';
 import { GenColumnsEntity } from './entities/genColumns.entity';
-// import { PaginatedDto } from '@common/Result';
 import { RDto, RListDto } from '@common/Result.dto';
-import { ApiROfResponse, ApiRPrimitiveOfResponse } from './test';
+import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
 
 @ApiTags('genColumns')
 @ApiBearerAuth()
@@ -84,28 +75,10 @@ export class GenColumnsController {
      * 删除代码生成字段表
      */
     @ApiOperation({ summary: '删除代码生成字段表' })
+    @ApiRPrimitiveOfResponse()
     @Delete('/genColumns/remove/:id')
-    @ApiResponse({
-        status: 200,
-        schema: {
-            type: 'object',
-            properties: {
-                data: { type: 'array', items: { $ref: getSchemaPath(GenColumnsEntity) } },
-                code: {
-                    type: 'integer',
-                    description: '通用状态码[200:正常, 400: 客户端参数错误, 500: 服务器内部错误]',
-                    format: 'int32',
-                },
-                msg: { type: 'string', description: '业务详细信息(可为空)' },
-                status: {
-                    type: 'integer',
-                    description: '业务状态码(0为标准状态,其它见方法提示)',
-                    format: 'int32',
-                },
-            },
-        },
-    })
-    remove(@Param('id') id: number) {
-        return this.genColumnsService.delete(id);
+    async remove(@Param('id') id: number) {
+        await this.genColumnsService.delete(id);
+        return new RDto();
     }
 }
