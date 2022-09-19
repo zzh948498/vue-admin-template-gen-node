@@ -17,7 +17,6 @@ class GenTableListWhereDto {
      */
     @IsOptional()
     remark?: string;
-
 }
 
 export class GenTableListDto {
