@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RDto<T> {
+export class RDto<T = ''> {
     constructor({
         code = 200,
         msg = '',
@@ -10,12 +10,12 @@ export class RDto<T> {
         code?: number;
         status?: number;
         msg?: string;
-        data?: T | undefined;
+        data?: T;
     } = {}) {
         this.code = code;
         this.status = status;
         this.msg = msg;
-        this.data = data;
+        this.data = data ?? ('' as T);
     }
 
     /**
@@ -37,6 +37,10 @@ export class RDto<T> {
     @ApiProperty()
     data: T;
 }
+
+const a = new RDto();
+a.data;
+debugger;
 export class RListDto<T> extends RDto<T> {
     constructor({
         total = 0,
