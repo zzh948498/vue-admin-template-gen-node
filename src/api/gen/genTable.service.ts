@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { GenTableCreateDto, GenTableListDto, GenTableUpdateDto } from './dto';
+import { GenTableCreateDto, GenTableListDto, GenTableAllDto, GenTableUpdateDto } from './dto';
 import { GenTableEntity } from './entities/genTable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,16 +11,20 @@ export class GenTableService {
         return this.genTableRepository.save(entity);
     }
 
-    findAll() {
-        return `This action returns all genTable`;
+    findAll(dto: GenTableAllDto) {
+        return this.genTableRepository.find({
+            where: dto.where,
+            order: { createdAt: 'DESC' },
+            relations: ['columns'],
+        });
     }
     async list(dto: GenTableListDto) {
-        const { page = 0, psize = 20 } = dto.limit || {};
+        const { page = 1, psize = 20 } = dto.limit || {};
         const [data, total] = await Promise.all([
             this.genTableRepository.find({
                 where: dto.where,
                 order: { createdAt: 'DESC' },
-                skip: page * psize,
+                skip: (page - 1) * psize,
                 take: psize,
             }),
             this.genTableRepository.count({
@@ -30,7 +34,7 @@ export class GenTableService {
         return { data, total };
     }
     async findById(id: number) {
-        const entity = await this.genTableRepository.findOneBy({ id });
+        const entity = await this.genTableRepository.findOne({ where: { id }, relations: ['columns'] });
 
         if (!entity) throw new BadRequestException('数据不存在');
         return entity;
@@ -39,7 +43,7 @@ export class GenTableService {
     async update(id: number, update: GenTableUpdateDto) {
         return this.genTableRepository.update(id, update);
     }
-    async delete(id: number) {
-        return this.genTableRepository.delete({ id });
+    async delete(id: number | number[]) {
+        return this.genTableRepository.delete(id);
     }
 }

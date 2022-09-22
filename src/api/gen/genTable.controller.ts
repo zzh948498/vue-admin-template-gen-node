@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Limit } from '@common/utils/constants';
-import { GenTableCreateDto, GenTableListDto, GenTableUpdateDto } from './dto';
+import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GenTableCreateDto, GenTableListDto, GenTableAllDto, GenTableUpdateDto } from './dto';
 import { GenTableService } from './genTable.service';
 import { GenTableEntity } from './entities/genTable.entity';
 import { RDto, RListDto } from '@common/Result.dto';
 import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
+import { BodyIdsDto } from '@common/BodyIds.dto';
+import { Limit } from '@common/utils/constants';
 
 @ApiTags('genTable')
 @ApiBearerAuth()
@@ -47,10 +48,16 @@ export class GenTableController {
         const { data, total } = await this.genTableService.list({ limit });
         return new RListDto({ data, total });
     }
-    // @Get('/genTable')
-    // findAll() {
-    //     return this.genTableService.findAll();
-    // }
+    /**
+     * 代码生成信息表列表-全部
+     */
+    @ApiOperation({ summary: '代码生成信息表列表-全部' })
+    @ApiROfResponse(GenTableEntity, 'array')
+    @Get('/genTable/all')
+    async findAll(@Query() dto: GenTableAllDto) {
+        const data = await this.genTableService.findAll(dto);
+        return new RListDto({ data, total: data.length });
+    }
     /**
      * 代码生成信息表详情
      */
@@ -79,6 +86,17 @@ export class GenTableController {
     @Delete('/genTable/remove/:id')
     async remove(@Param('id') id: number) {
         await this.genTableService.delete(id);
+        return new RDto();
+    }
+    /**
+     * 删除代码生成信息表
+     */
+    @ApiOperation({ summary: '删除代码生成信息表' })
+    @ApiRPrimitiveOfResponse()
+    @Post('/genTable/removes')
+    async removes(@Body() dto: BodyIdsDto) {
+        console.log(dto)
+        await this.genTableService.delete(dto.ids);
         return new RDto();
     }
 }

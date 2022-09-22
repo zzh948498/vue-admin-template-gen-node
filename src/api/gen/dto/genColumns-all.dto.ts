@@ -1,6 +1,7 @@
-import { IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ColumnsType } from '../entities/genColumns.entity';
-export class GenColumnsUpdateDto {
+class GenColumnsAllWhereDto {
     /**
      * 字段名称
      */
@@ -46,4 +47,12 @@ export class GenColumnsUpdateDto {
      */
     @IsOptional()
     tableId?: number;
+}
+
+export class GenColumnsAllDto {
+    @ValidateNested()
+    @IsOptional()
+    // 这里不加Type不会验证
+    @Type(() => GenColumnsAllWhereDto)
+    where?: GenColumnsAllWhereDto;
 }

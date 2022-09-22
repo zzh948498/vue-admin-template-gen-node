@@ -7,7 +7,7 @@ export class GenColumnsCreateDto {
     @IsNotEmpty({
         message: '字段名称不能为空',
     })
-    entityName: string;
+    name: string;
 
     /**
      * 字段描述

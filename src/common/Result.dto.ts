@@ -38,9 +38,6 @@ export class RDto<T = ''> {
     data: T;
 }
 
-const a = new RDto();
-a.data;
-debugger;
 export class RListDto<T> extends RDto<T> {
     constructor({
         total = 0,

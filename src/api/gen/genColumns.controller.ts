@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Limit } from '@common/utils/constants';
-import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsUpdateDto } from './dto';
+import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsAllDto, GenColumnsUpdateDto } from './dto';
 import { GenColumnsService } from './genColumns.service';
 import { GenColumnsEntity } from './entities/genColumns.entity';
 import { RDto, RListDto } from '@common/Result.dto';
@@ -47,10 +47,16 @@ export class GenColumnsController {
         const { data, total } = await this.genColumnsService.list({ limit });
         return new RListDto({ data, total });
     }
-    // @Get('/genColumns')
-    // findAll() {
-    //     return this.genColumnsService.findAll();
-    // }
+    /**
+     * 代码生成字段表列表-全部
+     */
+    @ApiOperation({ summary: '代码生成字段表列表-全部' })
+    @ApiROfResponse(GenColumnsEntity, 'array')
+    @Get('/genColumns/all')
+    async findAll(@Query() dto: GenColumnsAllDto) {
+        const data = await this.genColumnsService.findAll(dto);
+        return new RListDto({ data, total: data.length });
+    }
     /**
      * 代码生成字段表详情
      */

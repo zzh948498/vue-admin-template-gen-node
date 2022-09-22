@@ -7,7 +7,7 @@ class GenColumnsListWhereDto {
      * 字段名称
      */
     @IsOptional()
-    entityName?: string;
+    name?: string;
     /**
      * 字段描述
      */

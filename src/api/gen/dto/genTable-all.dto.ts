@@ -1,8 +1,7 @@
-import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { TemplateCategory, TableRelations } from '../entities/genTable.entity';
-class GenTableListWhereDto {
+class GenTableAllWhereDto {
     /**
      * 表名称
      */
@@ -40,14 +39,10 @@ class GenTableListWhereDto {
     subTableFkName?: string;
 }
 
-export class GenTableListDto {
+export class GenTableAllDto {
     @ValidateNested()
     @IsOptional()
     // 这里不加Type不会验证
-    @Type(() => GenTableListWhereDto)
-    where?: GenTableListWhereDto;
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => Limit)
-    limit?: Limit;
+    @Type(() => GenTableAllWhereDto)
+    where?: GenTableAllWhereDto;
 }

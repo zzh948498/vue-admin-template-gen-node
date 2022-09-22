@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsUpdateDto } from './dto';
+import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsAllDto, GenColumnsUpdateDto } from './dto';
 import { GenColumnsEntity } from './entities/genColumns.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -11,16 +11,19 @@ export class GenColumnsService {
         return this.genColumnsRepository.save(entity);
     }
 
-    findAll() {
-        return `This action returns all genColumns`;
+    findAll(dto: GenColumnsAllDto) {
+        return this.genColumnsRepository.find({
+            where: dto.where,
+            order: { createdAt: 'DESC' },
+        });
     }
     async list(dto: GenColumnsListDto) {
-        const { page = 0, psize = 20 } = dto.limit || {};
+        const { page = 1, psize = 20 } = dto.limit || {};
         const [data, total] = await Promise.all([
             this.genColumnsRepository.find({
                 where: dto.where,
                 order: { createdAt: 'DESC' },
-                skip: page * psize,
+                skip: (page - 1) * psize,
                 take: psize,
             }),
             this.genColumnsRepository.count({

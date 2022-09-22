@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
     Entity,
     Column,
@@ -34,7 +33,7 @@ export class GenColumnsEntity extends BaseEntity {
      * 字段名称
      */
     @Column()
-    entityName: string;
+    name: string;
     /**
      * 字段描述
      */
@@ -99,7 +98,6 @@ export class GenColumnsEntity extends BaseEntity {
      */
     @ManyToOne(() => GenTableEntity, table => table.columns)
     @JoinColumn({ name: 'tableId' })
-    @ApiProperty({ type: () => GenTableEntity })
     table: GenTableEntity;
     /**
      * 表id
