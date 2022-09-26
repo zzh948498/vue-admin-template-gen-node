@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Delete, Query, Res, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GenTableCreateDto, GenTableListDto, GenTableAllDto, GenTableUpdateDto } from './dto';
 import { GenTableService } from './genTable.service';
@@ -7,7 +7,7 @@ import { RDto, RListDto } from '@common/Result.dto';
 import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
 import { BodyIdsDto } from '@common/BodyIds.dto';
 import { Limit } from '@common/utils/constants';
-
+import { Response } from 'express';
 @ApiTags('genTable')
 @ApiBearerAuth()
 @ApiExtraModels(GenTableEntity)
@@ -95,8 +95,18 @@ export class GenTableController {
     @ApiRPrimitiveOfResponse()
     @Post('/genTable/removes')
     async removes(@Body() dto: BodyIdsDto) {
-        console.log(dto)
         await this.genTableService.delete(dto.ids);
         return new RDto();
+    }
+
+    /**
+     * 生成代码
+     */
+    @ApiOperation({ summary: '生成代码' })
+    @ApiRPrimitiveOfResponse('number', 'array')
+    @Post('/genCode')
+    async genCode(@Body() dto: BodyIdsDto) {
+        const data = await this.genTableService.genCode(dto.ids);
+        return new RDto({ data: data });
     }
 }

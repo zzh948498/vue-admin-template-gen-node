@@ -2,7 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GenTableCreateDto, GenTableListDto, GenTableAllDto, GenTableUpdateDto } from './dto';
 import { GenTableEntity } from './entities/genTable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import * as JSZip from 'jszip';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -45,5 +46,77 @@ export class GenTableService {
     }
     async delete(id: number | number[]) {
         return this.genTableRepository.delete(id);
+    }
+    async genCode(ids: number[]) {
+        const entities = await this.genTableRepository.find({
+            where: {
+                id: In(ids),
+            },
+            relations: ['columns'],
+        });
+        if (!entities.length) {
+            throw new BadRequestException('未找到相关信息');
+        }
+        const strs = entities.map(entity => {
+            return `import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+    BaseEntity,
+} from 'typeorm';
+
+/**
+ * ${entity.desc}
+ */
+@Entity()
+export class ${entity.name} extends BaseEntity {
+    /**
+     * id
+     */
+    @PrimaryGeneratedColumn()
+    id: number;
+    ${entity.columns.map(
+        column => `
+    /**
+     * ${column.desc}
+     */
+    @Column()
+    ${column.name}${column.required ? '' : '?'}: ${column.tsType};
+    `
+    )}
+    /**
+     * 表名称
+     */
+    @Column({ unique: true })
+    name: string;
+    /**
+     * 创建时间
+     */
+    @CreateDateColumn()
+    createdAt: Date;
+    /**
+     * 修改时间
+     */
+    @UpdateDateColumn()
+    updatedAt: Date;
+}
+
+`;
+        });
+        const zip = new JSZip();
+        entities.map((entity, idx) => {
+            zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+        });
+        return zip.generateAsync({
+            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+            type: 'array',
+            // 压缩算法
+            compression: 'DEFLATE',
+            compressionOptions: {
+                level: 9,
+            },
+        });
     }
 }
