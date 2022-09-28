@@ -1,5 +1,5 @@
 import { IsOptional } from 'class-validator';
-import { TemplateCategory, TableRelations } from '../entities/genTable.entity';
+import { TemplateCategory } from '../entities/genTable.entity';
 export class GenTableUpdateDto {
     /**
      * 表名称
@@ -21,19 +21,4 @@ export class GenTableUpdateDto {
      */
     @IsOptional()
     tplCategory?: TemplateCategory;
-    /**
-     * 子表名称
-     */
-    @IsOptional()
-    subTableName?: string;
-    /**
-     * 子表关系类型
-     */
-    @IsOptional()
-    relations?: TableRelations;
-    /**
-     * 子表关联的外键名
-     */
-    @IsOptional()
-    subTableFkName?: string;
 }

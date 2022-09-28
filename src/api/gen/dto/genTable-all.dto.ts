@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { TemplateCategory, TableRelations } from '../entities/genTable.entity';
+import { TemplateCategory } from '../entities/genTable.entity';
 class GenTableAllWhereDto {
     /**
      * 表名称
@@ -22,21 +22,6 @@ class GenTableAllWhereDto {
      */
     @IsOptional()
     tplCategory?: TemplateCategory;
-    /**
-     * 子表名称
-     */
-    @IsOptional()
-    subTableName?: string;
-    /**
-     * 子表关系类型
-     */
-    @IsOptional()
-    relations?: TableRelations;
-    /**
-     * 子表关联的外键名
-     */
-    @IsOptional()
-    subTableFkName?: string;
 }
 
 export class GenTableAllDto {

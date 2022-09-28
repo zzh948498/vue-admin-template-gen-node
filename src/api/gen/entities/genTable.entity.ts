@@ -8,10 +8,10 @@ import {
     OneToMany,
 } from 'typeorm';
 import { GenColumnsEntity } from './genColumns.entity';
+import { GenTableRelationsEntity } from './GenTableRelations.entity';
 export enum TemplateCategory {
     crud = 'crud',
     tree = 'tree',
-    sub = 'sub',
 }
 export enum TableRelations {
     OneToOne = 'OneToOne',
@@ -63,6 +63,12 @@ export class GenTableEntity extends BaseEntity {
     columns: GenColumnsEntity[];
 
     /**
+     * 关系
+     */
+    @OneToMany(() => GenTableRelationsEntity, column => column.table)
+    relations: GenTableRelationsEntity[];
+
+    /**
      * 生成模板类型
      */
     @Column({
@@ -70,23 +76,4 @@ export class GenTableEntity extends BaseEntity {
         enum: TemplateCategory,
     })
     tplCategory: TemplateCategory;
-    /**
-     * 子表名称
-     */
-    @Column({ default: '' })
-    subTableName?: string;
-    /**
-     * 子表关系类型
-     */
-    @Column({
-        type: 'enum',
-        enum: TableRelations,
-        nullable: true,
-    })
-    relations?: TableRelations;
-    /**
-     * 子表关联的外键名
-     */
-    @Column({ default: '' })
-    subTableFkName?: string;
 }

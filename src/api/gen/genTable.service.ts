@@ -6,7 +6,6 @@ import { ColumnOptions, In, Repository } from 'typeorm';
 import * as JSZip from 'jszip';
 import { upperFirst } from 'lodash';
 import { ColumnsType } from './entities/genColumns.entity';
-import { writeFile } from 'fs-extra';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -19,7 +18,7 @@ export class GenTableService {
         return this.genTableRepository.find({
             where: dto.where,
             order: { createdAt: 'DESC' },
-            relations: ['columns'],
+            relations: ['columns', 'relations'],
         });
     }
     async list(dto: GenTableListDto) {
@@ -38,7 +37,10 @@ export class GenTableService {
         return { data, total };
     }
     async findById(id: number) {
-        const entity = await this.genTableRepository.findOne({ where: { id }, relations: ['columns'] });
+        const entity = await this.genTableRepository.findOne({
+            where: { id },
+            relations: ['columns', 'relations'],
+        });
 
         if (!entity) throw new BadRequestException('数据不存在');
         return entity;
@@ -76,6 +78,11 @@ export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
 `;
                 })
                 .join('');
+
+
+                // entity.relations.map(relation=>{
+
+                // })
             return `import {
     Entity,
     Column,
@@ -142,17 +149,17 @@ export class ${entity.name} extends BaseEntity {
         });
         const zip = new JSZip();
         entities.map((entity, idx) => {
-            writeFile(Date.now() + entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
-            // zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+            // writeFile(Date.now() + entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+            zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
         });
-        // return zip.generateAsync({
-        //     // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
-        //     type: 'array',
-        //     // 压缩算法
-        //     compression: 'DEFLATE',
-        //     compressionOptions: {
-        //         level: 9,
-        //     },
-        // });
+        return zip.generateAsync({
+            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+            type: 'array',
+            // 压缩算法
+            compression: 'DEFLATE',
+            compressionOptions: {
+                level: 9,
+            },
+        });
     }
 }
