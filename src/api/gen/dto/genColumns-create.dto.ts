@@ -26,6 +26,20 @@ export class GenColumnsCreateDto {
     tsType: ColumnsType;
 
     /**
+     * 是否枚举类型
+     */
+    @IsNotEmpty({
+        message: '是否枚举类型不能为空',
+    })
+    isEnum: boolean;
+
+    /**
+     * 枚举类型的值
+     */
+    @IsOptional()
+    enumValues?: string[];
+
+    /**
      * 插入
      */
     @IsNotEmpty({

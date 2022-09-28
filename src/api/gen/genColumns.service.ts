@@ -2,10 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GenColumnsCreateDto, GenColumnsListDto, GenColumnsAllDto, GenColumnsUpdateDto } from './dto';
 import { GenColumnsEntity } from './entities/genColumns.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 @Injectable()
 export class GenColumnsService {
-    constructor(@InjectRepository(GenColumnsEntity) private genColumnsRepository: Repository<GenColumnsEntity>) {}
+    constructor(
+        @InjectRepository(GenColumnsEntity) private genColumnsRepository: Repository<GenColumnsEntity>
+    ) {}
 
     async create(entity: GenColumnsCreateDto) {
         return this.genColumnsRepository.save(entity);
@@ -13,7 +15,10 @@ export class GenColumnsService {
 
     findAll(dto: GenColumnsAllDto) {
         return this.genColumnsRepository.find({
-            where: dto.where,
+            where: {
+                ...dto.where,
+                enumValues: In(dto.where.enumValues),
+            },
             order: { createdAt: 'DESC' },
         });
     }
@@ -21,13 +26,19 @@ export class GenColumnsService {
         const { page = 1, psize = 20 } = dto.limit || {};
         const [data, total] = await Promise.all([
             this.genColumnsRepository.find({
-                where: dto.where,
+                where: {
+                    ...dto.where,
+                    enumValues: In(dto.where.enumValues),
+                },
                 order: { createdAt: 'DESC' },
                 skip: (page - 1) * psize,
                 take: psize,
             }),
             this.genColumnsRepository.count({
-                where: dto.where,
+                where: {
+                    ...dto.where,
+                    enumValues: In(dto.where.enumValues),
+                },
             }),
         ]);
         return { data, total };

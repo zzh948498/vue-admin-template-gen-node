@@ -2,8 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GenTableCreateDto, GenTableListDto, GenTableAllDto, GenTableUpdateDto } from './dto';
 import { GenTableEntity } from './entities/genTable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { ColumnOptions, In, Repository } from 'typeorm';
 import * as JSZip from 'jszip';
+import { upperFirst } from 'lodash';
+import { ColumnsType } from './entities/genColumns.entity';
+import { writeFile } from 'fs-extra';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -58,6 +61,21 @@ export class GenTableService {
             throw new BadRequestException('未找到相关信息');
         }
         const strs = entities.map(entity => {
+            // 创建枚举
+            const enums = entity.columns
+                .filter(it => it.isEnum)
+                .map(it => {
+                    return `
+export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
+                        ?.map(ele => {
+                            return `
+    ${ele}${it.tsType === ColumnsType.string ? ` = '${ele}'` : ''},`;
+                        })
+                        .join('')}
+}
+`;
+                })
+                .join('');
             return `import {
     Entity,
     Column,
@@ -66,7 +84,7 @@ export class GenTableService {
     UpdateDateColumn,
     BaseEntity,
 } from 'typeorm';
-
+${enums}
 /**
  * ${entity.desc}
  */
@@ -77,20 +95,37 @@ export class ${entity.name} extends BaseEntity {
      */
     @PrimaryGeneratedColumn()
     id: number;
-    ${entity.columns.map(
-        column => `
+    ${entity.columns
+        .map(column => {
+            const columnOptions: ColumnOptions = {};
+            if (!column.required) {
+                columnOptions.nullable = true;
+            }
+            let tsType: string | ColumnsType = column.tsType;
+            if (column.isEnum) {
+                tsType = `${entity.name}${upperFirst(column.name)}Enum`;
+                columnOptions.type = `'enum'` as any;
+                columnOptions.enum = tsType;
+            }
+            let columnOptionsStr = '';
+            if (Object.keys(columnOptions).length !== 0) {
+                columnOptionsStr = `{${Object.keys(columnOptions)
+                    .map(key => {
+                        return `
+        ${key}: ${columnOptions[key]},`;
+                    })
+                    .join('')}
+    }`;
+            }
+            return `
     /**
      * ${column.desc}
      */
-    @Column()
-    ${column.name}${column.required ? '' : '?'}: ${column.tsType};
-    `
-    )}
-    /**
-     * 表名称
-     */
-    @Column({ unique: true })
-    name: string;
+    @Column(${columnOptionsStr})
+    ${column.name}${column.required ? '' : '?'}: ${tsType};
+    `;
+        })
+        .join('')}
     /**
      * 创建时间
      */
@@ -107,16 +142,17 @@ export class ${entity.name} extends BaseEntity {
         });
         const zip = new JSZip();
         entities.map((entity, idx) => {
-            zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+            writeFile(Date.now() + entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+            // zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
         });
-        return zip.generateAsync({
-            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
-            type: 'array',
-            // 压缩算法
-            compression: 'DEFLATE',
-            compressionOptions: {
-                level: 9,
-            },
-        });
+        // return zip.generateAsync({
+        //     // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+        //     type: 'array',
+        //     // 压缩算法
+        //     compression: 'DEFLATE',
+        //     compressionOptions: {
+        //         level: 9,
+        //     },
+        // });
     }
 }

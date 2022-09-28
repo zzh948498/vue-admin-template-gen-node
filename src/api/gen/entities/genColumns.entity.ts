@@ -16,7 +16,6 @@ export enum ColumnsType {
     boolean = 'boolean',
     Date = 'Date',
 }
-
 /**
  * 代码生成字段表
  */
@@ -28,7 +27,7 @@ export class GenColumnsEntity extends BaseEntity {
 
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     /**
      * 字段名称
      */
@@ -47,6 +46,19 @@ export class GenColumnsEntity extends BaseEntity {
         enum: ColumnsType,
     })
     tsType: ColumnsType;
+
+    /**
+     * 是否枚举类型
+     */
+    @Column({
+        default: false,
+    })
+    isEnum: boolean;
+    /**
+     * 枚举类型的值
+     */
+    @Column('simple-array')
+    enumValues?: string[];
     /**
      * 插入
      */

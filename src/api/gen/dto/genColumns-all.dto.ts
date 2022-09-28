@@ -18,6 +18,16 @@ class GenColumnsAllWhereDto {
     @IsOptional()
     tsType?: ColumnsType;
     /**
+     * 是否枚举类型
+     */
+    @IsOptional()
+    isEnum?: boolean;
+    /**
+     * 枚举类型的值
+     */
+    @IsOptional()
+    enumValues?: string[];
+    /**
      * 插入
      */
     @IsOptional()
