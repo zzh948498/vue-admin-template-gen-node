@@ -8,7 +8,7 @@ import {
     OneToMany,
 } from 'typeorm';
 import { GenColumnsEntity } from './genColumns.entity';
-import { GenTableRelationsEntity } from './GenTableRelations.entity';
+import { GenTableRelationsEntity } from './genTableRelations.entity';
 export enum TemplateCategory {
     crud = 'crud',
     tree = 'tree',

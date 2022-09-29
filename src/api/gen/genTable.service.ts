@@ -7,7 +7,7 @@ import * as JSZip from 'jszip';
 import { upperFirst } from 'lodash';
 import { ColumnsType } from './entities/genColumns.entity';
 import { writeFile } from 'fs-extra';
-import { GenTableRelationsEntityTypeEnum } from './entities/GenTableRelations.entity';
+import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}

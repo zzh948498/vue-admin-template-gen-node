@@ -1,7 +1,7 @@
 import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { GenTableRelationsEntityTypeEnum } from '../entities/GenTableRelations.entity';
+import { GenTableRelationsEntityTypeEnum } from '../entities/genTableRelations.entity';
 class GenTableRelationsListWhereDto {
     /**
      * 子表名称

@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GenColumnsController } from './genColumns.controller';
 import { GenColumnsService } from './genColumns.service';
 import { GenColumnsEntity } from './entities/genColumns.entity';
-import { GenTableController } from "./genTable.controller";
-import { GenTableService } from "./genTable.service";
-import { GenTableEntity } from "./entities/genTable.entity";
-import { GenTableRelationsController } from "./GenTableRelations.controller";
-import { GenTableRelationsService } from "./GenTableRelations.service";
-import { GenTableRelationsEntity } from "./entities/GenTableRelations.entity";
+import { GenTableController } from './genTable.controller';
+import { GenTableService } from './genTable.service';
+import { GenTableEntity } from './entities/genTable.entity';
+
+import { GenTableRelationsEntity } from './entities/genTableRelations.entity';
+import { GenTableRelationsController } from "./genTableRelations.controller";
+import { GenTableRelationsService } from "./genTableRelations.service";
 
 @Module({
     imports: [TypeOrmModule.forFeature([GenColumnsEntity, GenTableEntity, GenTableRelationsEntity])],

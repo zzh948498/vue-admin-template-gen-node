@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { GenTableRelationsEntityTypeEnum } from '../entities/GenTableRelations.entity';
+import { GenTableRelationsEntityTypeEnum } from '../entities/genTableRelations.entity';
 export class GenTableRelationsCreateDto {
     /**
      * 子表名称

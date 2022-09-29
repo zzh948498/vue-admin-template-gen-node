@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GenTableRelationsCreateDto, GenTableRelationsListDto, GenTableRelationsAllDto, GenTableRelationsUpdateDto } from './dto';
-import { GenTableRelationsEntity } from './entities/GenTableRelations.entity';
+import { GenTableRelationsEntity } from './entities/genTableRelations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 @Injectable()

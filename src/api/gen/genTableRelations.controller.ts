@@ -2,8 +2,8 @@ import { Controller, Get, Post, Patch, Body, Param, Delete, Query } from '@nestj
 import { ApiBearerAuth, ApiExtraModels, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Limit } from '@common/utils/constants';
 import { GenTableRelationsCreateDto, GenTableRelationsListDto, GenTableRelationsAllDto, GenTableRelationsUpdateDto } from './dto';
-import { GenTableRelationsService } from './GenTableRelations.service';
-import { GenTableRelationsEntity } from './entities/GenTableRelations.entity';
+import { GenTableRelationsService } from './genTableRelations.service';
+import { GenTableRelationsEntity } from './entities/genTableRelations.entity';
 import { RDto, RListDto } from '@common/Result.dto';
 import { BodyIdsDto } from '@common/BodyIds.dto';
 import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
