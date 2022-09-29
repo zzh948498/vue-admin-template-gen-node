@@ -6,6 +6,8 @@ import { ColumnOptions, In, Repository } from 'typeorm';
 import * as JSZip from 'jszip';
 import { upperFirst } from 'lodash';
 import { ColumnsType } from './entities/genColumns.entity';
+import { writeFile } from 'fs-extra';
+import { GenTableRelationsEntityTypeEnum } from './entities/GenTableRelations.entity';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -57,7 +59,7 @@ export class GenTableService {
             where: {
                 id: In(ids),
             },
-            relations: ['columns'],
+            relations: ['columns', 'relations'],
         });
         if (!entities.length) {
             throw new BadRequestException('未找到相关信息');
@@ -79,17 +81,53 @@ export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
                 })
                 .join('');
 
-
-                // entity.relations.map(relation=>{
-
-                // })
+            let relationsStr = '';
+            const JoinColumnTypes = [
+                GenTableRelationsEntityTypeEnum.OneToOne,
+                GenTableRelationsEntityTypeEnum.ManyToOne,
+            ];
+            const typeormImports = new Set<string>();
+            entity.relations.map(relation => {
+                typeormImports.add('JoinColumn');
+                const fkName = `${relation.relationColumn}${upperFirst(relation.subTableFkName)}`;
+                relationsStr += `
+    /**
+     * ${relation.relationColumn}
+     */
+    @${relation.type}(() => ${relation.subTableName}, ${relation.relationColumn} => ${
+                    relation.relationColumn
+                }.${relation.targetColumn})${
+                    JoinColumnTypes.includes(relation.type)
+                        ? `
+    @JoinColumn({ name: '${fkName}' })`
+                        : ''
+                } 
+    ${relation.relationColumn}: ${relation.subTableName};
+                    `;
+                if (JoinColumnTypes.includes(relation.type)) {
+                    relationsStr += `
+    /**
+     * ${fkName}
+     */
+    @Column({ name: '${fkName}' })
+    ${fkName}: number; 
+    `;
+                }
+                typeormImports.add(relation.type);
+            });
+            const typeormImportsStr = [...typeormImports]
+                .map(
+                    it => `
+    ${it},`
+                )
+                .join('');
             return `import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
-    BaseEntity,
+    BaseEntity,${typeormImportsStr}
 } from 'typeorm';
 ${enums}
 /**
@@ -143,6 +181,7 @@ export class ${entity.name} extends BaseEntity {
      */
     @UpdateDateColumn()
     updatedAt: Date;
+${relationsStr}
 }
 
 `;
