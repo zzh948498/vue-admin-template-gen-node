@@ -4,7 +4,7 @@ import { GenTableEntity } from './entities/genTable.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ColumnOptions, In, Repository } from 'typeorm';
 import * as JSZip from 'jszip';
-import { upperFirst } from 'lodash';
+import { lowerFirst, upperFirst } from 'lodash';
 import { ColumnsType } from './entities/genColumns.entity';
 import { writeFile } from 'fs-extra';
 import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
@@ -70,7 +70,7 @@ export class GenTableService {
                 .filter(it => it.isEnum)
                 .map(it => {
                     return `
-export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
+export enum ${upperFirst(entity.name)}${upperFirst(it.name)}Enum {${it.enumValues
                         ?.map(ele => {
                             return `
     ${ele}${it.tsType === ColumnsType.string ? ` = '${ele}'` : ''},`;
@@ -80,7 +80,7 @@ export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
 `;
                 })
                 .join('');
-
+            //  关系字符串
             let relationsStr = '';
             const JoinColumnTypes = [
                 GenTableRelationsEntityTypeEnum.OneToOne,
@@ -88,8 +88,14 @@ export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
             ];
             const typeormImports = new Set<string>();
             entity.relations.map(relation => {
-                typeormImports.add('JoinColumn');
+                if (relation.type !== GenTableRelationsEntityTypeEnum.OneToMany) {
+                    typeormImports.add('JoinColumn');
+                }
                 const fkName = `${relation.relationColumn}${upperFirst(relation.subTableFkName)}`;
+                const isArrRelation =
+                    relation.type === GenTableRelationsEntityTypeEnum.OneToMany ||
+                    relation.type === GenTableRelationsEntityTypeEnum.ManyToMany;
+                // 字符串拼接
                 relationsStr += `
     /**
      * ${relation.relationColumn}
@@ -102,7 +108,7 @@ export enum ${entity.name}${upperFirst(it.name)}Enum {${it.enumValues
     @JoinColumn({ name: '${fkName}' })`
                         : ''
                 } 
-    ${relation.relationColumn}: ${relation.subTableName};
+    ${relation.relationColumn}: ${relation.subTableName}${isArrRelation ? '[]' : ''};
                     `;
                 if (JoinColumnTypes.includes(relation.type)) {
                     relationsStr += `
@@ -134,7 +140,7 @@ ${enums}
  * ${entity.desc}
  */
 @Entity()
-export class ${entity.name} extends BaseEntity {
+export class ${upperFirst(entity.name)} extends BaseEntity {
     /**
      * id
      */
@@ -148,7 +154,7 @@ export class ${entity.name} extends BaseEntity {
             }
             let tsType: string | ColumnsType = column.tsType;
             if (column.isEnum) {
-                tsType = `${entity.name}${upperFirst(column.name)}Enum`;
+                tsType = `${upperFirst(entity.name)}${upperFirst(column.name)}Enum`;
                 columnOptions.type = `'enum'` as any;
                 columnOptions.enum = tsType;
             }
@@ -188,8 +194,8 @@ ${relationsStr}
         });
         const zip = new JSZip();
         entities.map((entity, idx) => {
-            // writeFile(Date.now() + entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
-            zip.file(entity.name.replace(/Entity$/, '.entity.ts'), strs[idx]);
+            // writeFile(Date.now() + lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
+            zip.file(lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
         });
         return zip.generateAsync({
             // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
