@@ -11,8 +11,8 @@ import {
 import { DictEntity } from './dict.entity';
 
 export enum DictDataEntityStatusEnum {
-    Normal,
-    Disable,
+    Normal = 'Normal',
+    Disable = 'Disable',
 }
 
 /**
@@ -53,7 +53,7 @@ export class DictDataEntity extends BaseEntity {
     value: string;
     
     /**
-     * 状态（0正常 1停用）
+     * 状态
      */
     @Column({
         nullable: true,

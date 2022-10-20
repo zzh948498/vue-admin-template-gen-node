@@ -32,7 +32,7 @@ export class DictDataCreateDto {
     value: string;
 
     /**
-     * 状态（0正常 1停用）
+     * 状态
      */
     @IsOptional()
     status?: DictDataEntityStatusEnum;

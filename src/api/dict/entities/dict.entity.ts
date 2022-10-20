@@ -10,8 +10,8 @@ import {
 import { DictDataEntity } from './dictData.entity';
 
 export enum DictEntityStatusEnum {
-    Normal,
-    Disable,
+    Normal = 'Normal',
+    Disable = 'Disable',
 }
 
 /**

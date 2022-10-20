@@ -2,7 +2,7 @@ import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { DictEntityStatusEnum } from '../entities/dict.entity';
-class DictListWhereDto {
+export class DictListWhereDto {
     /**
      * 字典名称
      */
@@ -23,6 +23,11 @@ class DictListWhereDto {
      */
     @IsOptional()
     type?: string;
+    /**
+     * 创建时间
+     */
+    @IsOptional()
+    createdAt?: [Date, Date];
 }
 
 export class DictListDto {

@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { DictCreateDto, DictListDto, DictAllDto, DictUpdateDto } from './dto';
+import { DictCreateDto, DictListDto, DictAllDto, DictUpdateDto, DictListWhereDto } from './dto';
 import { DictEntity } from './entities/dict.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, FindOptionsWhere, Like, Raw, Repository } from 'typeorm';
+import { cloneDeep } from 'lodash';
 @Injectable()
 export class DictService {
     constructor(@InjectRepository(DictEntity) private dictRepository: Repository<DictEntity>) {}
@@ -19,15 +20,27 @@ export class DictService {
     }
     async list(dto: DictListDto) {
         const { page = 1, psize = 20 } = dto.limit || {};
+        console.log(dto.where);
+        const where = cloneDeep<Omit<DictListWhereDto, 'createdAt'>>(dto.where);
+        Reflect.deleteProperty(where, 'createdAt');
+        const findOptions: FindOptionsWhere<DictEntity> = {
+            ...where,
+        };
+        if (dto.where.title) {
+            findOptions.title = Like(`%${dto.where.title}%`);
+        }
+        if (dto.where.createdAt && dto.where.createdAt.length === 2) {
+            findOptions.createdAt = Between(dto.where.createdAt[0], dto.where.createdAt[1]);
+        }
         const [data, total] = await Promise.all([
             this.dictRepository.find({
-                where: dto.where,
+                where: findOptions,
                 order: { createdAt: 'DESC' },
                 skip: (page - 1) * psize,
                 take: psize,
             }),
             this.dictRepository.count({
-                where: dto.where,
+                where: findOptions,
             }),
         ]);
         return { data, total };
