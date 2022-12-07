@@ -16,7 +16,7 @@ export enum DictDataEntityStatusEnum {
 }
 
 /**
- * 字典数据表
+ * 字典数据
  */
 @Entity()
 export class DictDataEntity extends BaseEntity {

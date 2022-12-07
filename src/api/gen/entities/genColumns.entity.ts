@@ -17,14 +17,41 @@ export enum ColumnsType {
     Date = 'Date',
 }
 export enum ColumnsHTMLType {
+    /**
+     * 文本框
+     */
     input = 'input',
+    /**
+     * 文本域
+     */ 
     textarea = 'textarea',
+    /**
+     * 下拉框
+     */ 
     select = 'select',
+    /**
+     * 单选框
+     */
     radio = 'radio',
+    /**
+     * 复选框
+     */
     checkbox = 'checkbox',
+    /**
+     * 日期控件
+     */
     datetime = 'datetime',
+    /**
+     * 图片上传
+     */
     imageUpload = 'imageUpload',
+    /**
+     * 文件上传
+     */
     fileUpload = 'fileUpload',
+    /**
+     * 富文本控件
+     */
     editor = 'editor',
 }
 /**
