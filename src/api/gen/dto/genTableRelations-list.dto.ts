@@ -2,7 +2,7 @@ import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { GenTableRelationsEntityTypeEnum } from '../entities/genTableRelations.entity';
-class GenTableRelationsListWhereDto {
+export class GenTableRelationsListWhereDto {
     /**
      * 子表名称
      */
@@ -34,7 +34,6 @@ class GenTableRelationsListWhereDto {
     @IsOptional()
     tableId?: number;
 }
-
 export class GenTableRelationsListDto {
     @ValidateNested()
     @IsOptional()
@@ -46,3 +45,4 @@ export class GenTableRelationsListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
+     

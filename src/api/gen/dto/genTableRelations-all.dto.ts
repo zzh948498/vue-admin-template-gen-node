@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { GenTableRelationsEntityTypeEnum } from '../entities/genTableRelations.entity';
-class GenTableRelationsAllWhereDto {
+export class GenTableRelationsAllWhereDto {
     /**
      * 子表名称
      */
@@ -33,7 +33,6 @@ class GenTableRelationsAllWhereDto {
     @IsOptional()
     tableId?: number;
 }
-
 export class GenTableRelationsAllDto {
     @ValidateNested()
     @IsOptional()
@@ -41,3 +40,4 @@ export class GenTableRelationsAllDto {
     @Type(() => GenTableRelationsAllWhereDto)
     where?: GenTableRelationsAllWhereDto;
 }
+     

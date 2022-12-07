@@ -8,7 +8,6 @@ export class GenTableRelationsCreateDto {
         message: '子表名称不能为空',
     })
     subTableName: string;
-
     /**
      * 子表关系类型
      */
@@ -16,13 +15,11 @@ export class GenTableRelationsCreateDto {
         message: '子表关系类型不能为空',
     })
     type: GenTableRelationsEntityTypeEnum;
-
     /**
      * 子表关联的外键名
      */
     @IsOptional()
     subTableFkName?: string;
-
     /**
      * 自身关系字段
      */
@@ -30,7 +27,6 @@ export class GenTableRelationsCreateDto {
         message: '自身关系字段不能为空',
     })
     relationColumn: string;
-
     /**
      * 目标关系字段
      */
@@ -38,7 +34,6 @@ export class GenTableRelationsCreateDto {
         message: '目标关系字段不能为空',
     })
     targetColumn: string;
-
     /**
      * 表id
      */
@@ -46,5 +41,5 @@ export class GenTableRelationsCreateDto {
         message: '表id不能为空',
     })
     tableId: number;
-
 }
+            

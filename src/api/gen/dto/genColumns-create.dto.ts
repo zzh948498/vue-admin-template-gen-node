@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { ColumnsType } from '../entities/genColumns.entity';
+import { ColumnsType, ColumnsHTMLType } from '../entities/genColumns.entity';
 export class GenColumnsCreateDto {
     /**
      * 字段名称
@@ -8,7 +8,6 @@ export class GenColumnsCreateDto {
         message: '字段名称不能为空',
     })
     name: string;
-
     /**
      * 字段描述
      */
@@ -16,7 +15,6 @@ export class GenColumnsCreateDto {
         message: '字段描述不能为空',
     })
     desc: string;
-
     /**
      * ts类型
      */
@@ -24,7 +22,6 @@ export class GenColumnsCreateDto {
         message: 'ts类型不能为空',
     })
     tsType: ColumnsType;
-
     /**
      * 是否枚举类型
      */
@@ -32,13 +29,11 @@ export class GenColumnsCreateDto {
         message: '是否枚举类型不能为空',
     })
     isEnum: boolean;
-
     /**
      * 枚举类型的值
      */
     @IsOptional()
     enumValues?: string[];
-
     /**
      * 插入
      */
@@ -46,7 +41,6 @@ export class GenColumnsCreateDto {
         message: '插入不能为空',
     })
     isInsert: boolean;
-
     /**
      * 编辑
      */
@@ -54,7 +48,6 @@ export class GenColumnsCreateDto {
         message: '编辑不能为空',
     })
     isEdit: boolean;
-
     /**
      * 列表
      */
@@ -62,7 +55,6 @@ export class GenColumnsCreateDto {
         message: '列表不能为空',
     })
     isList: boolean;
-
     /**
      * 查询
      */
@@ -70,7 +62,6 @@ export class GenColumnsCreateDto {
         message: '查询不能为空',
     })
     isQuery: boolean;
-
     /**
      * 必填
      */
@@ -78,7 +69,13 @@ export class GenColumnsCreateDto {
         message: '必填不能为空',
     })
     required: boolean;
-
+    /**
+     * html类型
+     */
+    @IsNotEmpty({
+        message: 'html类型不能为空',
+    })
+    htmlType: ColumnsHTMLType;
     /**
      * 表id
      */
@@ -86,5 +83,5 @@ export class GenColumnsCreateDto {
         message: '表id不能为空',
     })
     tableId: number;
-
 }
+            

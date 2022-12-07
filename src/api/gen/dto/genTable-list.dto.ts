@@ -2,7 +2,7 @@ import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { TemplateCategory } from '../entities/genTable.entity';
-class GenTableListWhereDto {
+export class GenTableListWhereDto {
     /**
      * 表名称
      */
@@ -24,7 +24,6 @@ class GenTableListWhereDto {
     @IsOptional()
     tplCategory?: TemplateCategory;
 }
-
 export class GenTableListDto {
     @ValidateNested()
     @IsOptional()
@@ -36,3 +35,4 @@ export class GenTableListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
+     

@@ -1,5 +1,5 @@
 import { IsOptional } from 'class-validator';
-import { ColumnsType } from '../entities/genColumns.entity';
+import { ColumnsType, ColumnsHTMLType } from '../entities/genColumns.entity';
 export class GenColumnsUpdateDto {
     /**
      * 字段名称
@@ -52,8 +52,14 @@ export class GenColumnsUpdateDto {
     @IsOptional()
     required?: boolean;
     /**
+     * html类型
+     */
+    @IsOptional()
+    htmlType?: ColumnsHTMLType;
+    /**
      * 表id
      */
     @IsOptional()
     tableId?: number;
 }
+            

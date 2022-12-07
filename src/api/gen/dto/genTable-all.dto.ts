@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { TemplateCategory } from '../entities/genTable.entity';
-class GenTableAllWhereDto {
+export class GenTableAllWhereDto {
     /**
      * 表名称
      */
@@ -23,7 +23,6 @@ class GenTableAllWhereDto {
     @IsOptional()
     tplCategory?: TemplateCategory;
 }
-
 export class GenTableAllDto {
     @ValidateNested()
     @IsOptional()
@@ -31,3 +30,4 @@ export class GenTableAllDto {
     @Type(() => GenTableAllWhereDto)
     where?: GenTableAllWhereDto;
 }
+     

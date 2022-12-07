@@ -32,3 +32,4 @@ export class GenTableRelationsUpdateDto {
     @IsOptional()
     tableId?: number;
 }
+            

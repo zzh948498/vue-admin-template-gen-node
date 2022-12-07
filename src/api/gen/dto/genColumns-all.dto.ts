@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ColumnsType } from '../entities/genColumns.entity';
-class GenColumnsAllWhereDto {
+import { ColumnsType, ColumnsHTMLType } from '../entities/genColumns.entity';
+export class GenColumnsAllWhereDto {
     /**
      * 字段名称
      */
@@ -53,12 +53,16 @@ class GenColumnsAllWhereDto {
     @IsOptional()
     required?: boolean;
     /**
+     * html类型
+     */
+    @IsOptional()
+    htmlType?: ColumnsHTMLType;
+    /**
      * 表id
      */
     @IsOptional()
     tableId?: number;
 }
-
 export class GenColumnsAllDto {
     @ValidateNested()
     @IsOptional()
@@ -66,3 +70,4 @@ export class GenColumnsAllDto {
     @Type(() => GenColumnsAllWhereDto)
     where?: GenColumnsAllWhereDto;
 }
+     

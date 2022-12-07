@@ -22,3 +22,4 @@ export class GenTableUpdateDto {
     @IsOptional()
     tplCategory?: TemplateCategory;
 }
+            

@@ -8,7 +8,6 @@ export class GenTableCreateDto {
         message: '表名称不能为空',
     })
     name: string;
-
     /**
      * 表描述
      */
@@ -16,13 +15,11 @@ export class GenTableCreateDto {
         message: '表描述不能为空',
     })
     desc: string;
-
     /**
      * 备注
      */
     @IsOptional()
     remark?: string;
-
     /**
      * 生成模板类型
      */
@@ -30,5 +27,5 @@ export class GenTableCreateDto {
         message: '生成模板类型不能为空',
     })
     tplCategory: TemplateCategory;
-
 }
+            

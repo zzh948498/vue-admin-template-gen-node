@@ -1,8 +1,8 @@
 import { Limit } from '@common/utils/constants';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ColumnsType } from '../entities/genColumns.entity';
-class GenColumnsListWhereDto {
+import { ColumnsType, ColumnsHTMLType } from '../entities/genColumns.entity';
+export class GenColumnsListWhereDto {
     /**
      * 字段名称
      */
@@ -54,12 +54,16 @@ class GenColumnsListWhereDto {
     @IsOptional()
     required?: boolean;
     /**
+     * html类型
+     */
+    @IsOptional()
+    htmlType?: ColumnsHTMLType;
+    /**
      * 表id
      */
     @IsOptional()
     tableId?: number;
 }
-
 export class GenColumnsListDto {
     @ValidateNested()
     @IsOptional()
@@ -71,3 +75,4 @@ export class GenColumnsListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
+     
