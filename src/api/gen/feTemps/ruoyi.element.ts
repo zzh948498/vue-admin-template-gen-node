@@ -1,6 +1,6 @@
 import { ColumnsHTMLType } from '../entities/genColumns.entity';
 import { GenTableEntity } from '../entities/genTable.entity';
-import { upperFirst } from "lodash";
+import { upperFirst } from 'lodash';
 export class FeRuoYiElementTemp {
     entity: GenTableEntity;
     constructor(entity: GenTableEntity) {
@@ -44,8 +44,36 @@ export class FeRuoYiElementTemp {
             .join('')}
     `;
     }
+    genTableColunmString() {
+        const list = this.entity.columns.filter(it => it.isList);
+        return `${list
+            .map(it => {
+                switch (it.htmlType) {
+                    case ColumnsHTMLType.input:
+                    case ColumnsHTMLType.textarea:
+                        return `
+            <el-table-column label="${it.desc}" align="center" prop="${it.name}" show-overflow-tooltip />`;
+                    case ColumnsHTMLType.select:
+                    case ColumnsHTMLType.radio:
+                        return `
+            <el-table-column label="${it.desc}" align="center" prop="${it.name}">
+                <template #default="scope">
+                    <template v-for="item in ${it.name}Group">
+                        <template v-if="scope.row.${it.name} === item.value">
+                            <el-tag :key="item.value">{{ item.label }}</el-tag>
+                        </template>
+                    </template>
+                </template>
+            </el-table-column>`;
+                    default:
+                        return ``;
+                }
+            })
+            .join('')}`;
+    }
     genString() {
         const queryStr = this.genQueryString();
+        const tableColunmString =this.genTableColunmString()
         // 表名
         const tableName = this.entity.name.replace(/Entity$/, '');
         const TableName = upperFirst(tableName);
@@ -113,22 +141,8 @@ export class FeRuoYiElementTemp {
             </el-col>
             <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
-
-        <el-table v-loading="loading" :data="${tableName}List" @selectionChange="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
-            <el-table-column label="字典编号" align="center" prop="id" />
-            <el-table-column label="字典名称" align="center" prop="title" :show-overflow-tooltip="true" />
-            <el-table-column label="状态" align="center" prop="status">
-                <template #default="scope">
-                    <template v-for="item in statusGroup">
-                        <template v-if="scope.row.status === item.value">
-                            <el-tag :key="item.value">{{ item.label }}</el-tag>
-                        </template>
-                    </template>
-                </template>
-            </el-table-column>
-            <el-table-column label="状态" align="center" prop="status" :show-overflow-tooltip="true" />
-            <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
+        <!-- ${this.entity.desc} -->
+        <el-table v-loading="loading" :data="${tableName}List" @selectionChange="handleSelectionChange">${tableColunmString}
             <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
                 <template #default="scope">
                     <span>{{ dateFormat(scope.row.createdAt) }}</span>
@@ -164,63 +178,84 @@ export class FeRuoYiElementTemp {
             @pagination="getList"
         />
 
-        <!-- 添加或修改参数配置对话框 -->
-        <el-dialog v-model="open" :title="dialogTitle" width="500px" append-to-body>
-            <el-form ref="${tableName}Ref" :model="editForm" :rules="rules" label-width="80px">
+        <!-- 添加对话框 -->
+        <el-dialog v-model="addDialogVisible" title="添加字典类型" width="500px" append-to-body>
+            <el-form ref="addDictRef" :model="addForm" :rules="rules" label-width="80px">
                 <el-form-item label="字典名称" prop="title">
-                    <el-input v-model="editForm.title" placeholder="请输入字典名称" />
+                    <el-input v-model="addForm.title" placeholder="请输入字典名称" />
                 </el-form-item>
                 <el-form-item label="字典类型" prop="type">
-                    <el-input v-model="editForm.type" placeholder="请输入字典类型" />
+                    <el-input v-model="addForm.type" placeholder="请输入字典类型" />
                 </el-form-item>
                 <el-form-item label="状态" prop="status">
-                    <el-radio-group v-model="editForm.status">
-                        <el-radio v-for="item in statusGroup" :key="item.value" :label="item.value">{{
-                            item.label
+                    <el-radio-group v-model="addForm.status">
+                        <el-radio v-for="dict in statusGroup" :key="dict.value" :label="dict.value">{{
+                            dict.label
                         }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="备注" prop="remark">
-                    <el-input v-model="editForm.remark" type="textarea" placeholder="请输入内容"></el-input>
+                    <el-input v-model="addForm.remark" type="textarea" placeholder="请输入内容"></el-input>
                 </el-form-item>
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
-                    <el-button type="primary" @click="submitForm">确 定</el-button>
-                    <el-button @click="cancel">取 消</el-button>
+                    <el-button type="primary" @click="submitAddForm">确 定</el-button>
+                    <el-button @click="addCancel">取 消</el-button>
+                </div>
+            </template>
+        </el-dialog>
+        <!-- 修改参数配置对话框 -->
+        <el-dialog v-model="updateDialogVisible" title="修改字典类型" width="500px" append-to-body>
+            <el-form ref="updateDictRef" :model="updateForm" :rules="rules" label-width="80px">
+                <el-form-item label="字典名称" prop="title">
+                    <el-input v-model="updateForm.title" placeholder="请输入字典名称" />
+                </el-form-item>
+                <el-form-item label="字典类型" prop="type">
+                    <el-input v-model="updateForm.type" placeholder="请输入字典类型" />
+                </el-form-item>
+                <el-form-item label="状态" prop="status">
+                    <el-radio-group v-model="updateForm.status">
+                        <el-radio v-for="dict in statusGroup" :key="dict.value" :label="dict.value">{{
+                            dict.label
+                        }}</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="备注" prop="remark">
+                    <el-input v-model="updateForm.remark" type="textarea" placeholder="请输入内容"></el-input>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <div class="dialog-footer">
+                    <el-button type="primary" @click="submitUpdateForm">确 定</el-button>
+                    <el-button @click="updateCancel">取 消</el-button>
                 </div>
             </template>
         </el-dialog>
     </div>
 </template>
 
-<script setup name="${TableName}" lang="ts">
+<script setup name="Dict" lang="ts">
 import { dateFormat } from '@zeronejs/utils';
 import { ref } from 'vue';
 import { ElMessage, FormInstance } from 'element-plus';
 import { ElModalConfirm } from '@/plugins/ElModal';
 import { endOfDay } from 'date-fns';
 import { download } from '@/utils/request';
+import { cloneDeep } from 'lodash';
 // 接口
-import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto } from '@/api/interface';
-import { post${TableName}Create } from '@/api/controller/dict/post${TableName}Create';
-import { patch${TableName}UpdateById } from '@/api/controller/dict/patch${TableName}UpdateById';
-import { post${TableName}List } from '@/api/controller/dict/post${TableName}List';
-import { get${TableName}DetailsById } from '@/api/controller/dict/get${TableName}DetailsById';
+import type { DictCreateDto, DictEntity, DictListWhereDto, DictUpdateDto } from '@/api/interface';
+import { postDictCreate } from '@/api/controller/dict/postDictCreate';
+import { patchDictUpdateById } from '@/api/controller/dict/patchDictUpdateById';
+import { postDictList } from '@/api/controller/dict/postDictList';
+import { getDictDetailsById } from '@/api/controller/dict/getDictDetailsById';
 import { postDictRemoves } from '@/api/controller/dict/postDictRemoves';
 
-enum DictEntityStatusEnum {
-    Normal = 'Normal',
-    Disable = 'Disable',
-}
-// 新建/编辑 表单ref
-const dictRef = ref<FormInstance>();
 // 搜索栏
 const queryRef = ref<FormInstance>();
 
 const dictList = ref<DictEntity[]>([]);
-// 新增/编辑 弹窗
-const open = ref(false);
+
 // 列表loading
 const loading = ref(true);
 const showSearch = ref(true);
@@ -230,7 +265,6 @@ const single = ref(true);
 // 是否选中了数据
 const multiple = ref(true);
 const total = ref(0);
-const dialogTitle = ref('');
 // 创建日期
 const dateRange = ref<Date[]>([]);
 
@@ -238,15 +272,6 @@ const statusGroup = [
     { label: 'Normal', value: 'Normal' },
     { label: 'Disable', value: 'Disable' },
 ];
-const initFormValue = {
-    title: '',
-    status: DictEntityStatusEnum.Normal,
-    remark: '',
-    type: '',
-};
-const fromId = ref(0);
-// 新增/编辑
-const editForm = ref<DictCreateDto>({ ...initFormValue });
 const queryLimit = ref({
     page: 1,
     psize: 10,
@@ -279,17 +304,6 @@ const getList = async () => {
     total.value = data.total;
     loading.value = false;
 };
-/** 取消按钮 */
-const cancel = () => {
-    open.value = false;
-    reset();
-};
-/** 表单重置 */
-const reset = () => {
-    fromId.value = 0;
-    editForm.value = { ...initFormValue };
-    dictRef.value?.resetFields();
-};
 /** 搜索按钮操作 */
 const handleQuery = () => {
     queryLimit.value.page = 1;
@@ -301,11 +315,90 @@ const resetQuery = () => {
     queryRef.value?.resetFields();
     handleQuery();
 };
+// 新增/编辑弹窗通用逻辑
+const useDictDialog = <T extends DictCreateDto | DictUpdateDto>(initFormValue: T) => {
+    const dictRef = ref<FormInstance>();
+    const dialogVisible = ref(false);
+    const editForm = ref(cloneDeep(initFormValue));
+    /** 取消按钮 */
+    const cancel = () => {
+        dialogVisible.value = false;
+        reset();
+    };
+    /** 表单重置 */
+    const reset = () => {
+        fromId.value = 0;
+        editForm.value = cloneDeep(initFormValue);
+        dictRef.value?.resetFields();
+    };
+
+    return {
+        dictRef,
+        dialogVisible,
+        editForm,
+        cancel,
+        reset,
+    };
+};
+const fromId = ref(0);
+
+const initAddFormValue: DictCreateDto = {
+    title: '',
+    status: 'Normal',
+    remark: '',
+    type: '',
+};
+const initUpadteFormValue: DictUpdateDto = {
+    title: '',
+    status: 'Normal',
+    remark: '',
+    type: '',
+};
+
+/** 新增表单相关 */
+const {
+    dictRef: addDictRef,
+    dialogVisible: addDialogVisible,
+    editForm: addForm,
+    cancel: addCancel,
+    reset: addReset,
+} = useDictDialog(initAddFormValue);
+/** 编辑表单相关 */
+const {
+    dictRef: updateDictRef,
+    dialogVisible: updateDialogVisible,
+    editForm: updateForm,
+    cancel: updateCancel,
+    reset: updateReset,
+} = useDictDialog(initUpadteFormValue);
+/** 提交添加表单 */
+const submitAddForm = async () => {
+    try {
+        await addDictRef.value?.validate();
+    } catch (e) {
+        return console.log(e);
+    }
+    await postDictCreate(addForm.value);
+    ElMessage.success('新增成功');
+    addDialogVisible.value = false;
+    getList();
+};
+/** 提交修改表单 */
+const submitUpdateForm = async () => {
+    try {
+        await updateDictRef.value?.validate();
+    } catch (e) {
+        return console.log(e);
+    }
+    await patchDictUpdateById({ id: fromId.value }, updateForm.value);
+    ElMessage.success('修改成功');
+    updateDialogVisible.value = false;
+    getList();
+};
 /** 新增按钮操作 */
 const handleAdd = () => {
-    reset();
-    open.value = true;
-    dialogTitle.value = '添加字典类型';
+    addReset();
+    addDialogVisible.value = true;
 };
 /** 多选框选中数据 */
 const handleSelectionChange = (selection: DictEntity[]) => {
@@ -315,31 +408,15 @@ const handleSelectionChange = (selection: DictEntity[]) => {
 };
 /** 修改按钮操作 */
 const handleUpdate = async (row?: DictEntity) => {
-    reset();
+    updateReset();
     const dictId = row ? row.id : ids.value[0];
 
     const { data } = await getDictDetailsById({ id: dictId });
     fromId.value = dictId;
-    editForm.value = data.data;
-    open.value = true;
-    dialogTitle.value = '修改字典类型';
+    updateForm.value = data.data;
+    updateDialogVisible.value = true;
 };
-/** 提交按钮 */
-const submitForm = async () => {
-    const valid = await dictRef.value?.validate();
-    if (!valid) {
-        return;
-    }
-    if (fromId.value) {
-        await patchDictUpdateById({ id: fromId.value }, editForm.value);
-        ElMessage.success('修改成功');
-    } else {
-        await postDictCreate(editForm.value);
-        ElMessage.success('新增成功');
-    }
-    open.value = false;
-    getList();
-};
+
 /** 删除按钮操作 */
 const handleDelete = async (row?: DictEntity) => {
     const dictIds = row ? [row.id] : ids.value;
@@ -365,6 +442,7 @@ function handleExport() {
 
 getList();
 </script>
+
 `;
     }
 }
