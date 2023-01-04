@@ -8,6 +8,7 @@ import { lowerFirst, upperFirst } from 'lodash';
 import { ColumnsType } from './entities/genColumns.entity';
 import { writeFile } from 'fs-extra';
 import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
+import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -196,6 +197,10 @@ ${relationsStr}
         entities.map((entity, idx) => {
             // writeFile(Date.now() + lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
             zip.file(lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
+            // 前端代码
+            const temp = new FeRuoYiElementTemp(entity)
+            zip.file(lowerFirst(entity.name).replace(/Entity$/, '.vue'), temp.genString());
+
         });
         return zip.generateAsync({
             // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地

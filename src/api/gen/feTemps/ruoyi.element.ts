@@ -71,13 +71,101 @@ export class FeRuoYiElementTemp {
             })
             .join('')}`;
     }
+    genFormStringFactory(formType: 'add' | 'update') {
+        const list = this.entity.columns.filter(it => {
+            switch (formType) {
+                case 'add':
+                    return it.isInsert;
+                case 'update':
+                    return it.isEdit;
+            }
+        });
+        let formName = '';
+        switch (formType) {
+            case 'add':
+                formName = 'addForm';
+            case 'update':
+                formName = 'updateForm';
+        }
+        return `${list
+            .map(it => {
+                switch (it.htmlType) {
+                    case ColumnsHTMLType.input:
+                        return `
+                <el-form-item label="${it.desc}" prop="${it.name}">
+                    <el-input v-model="${formName}.${it.name}" placeholder="请输入${it.desc}" />
+                </el-form-item>`;
+                    case ColumnsHTMLType.textarea:
+                        return `
+                <el-form-item label="${it.desc}" prop="${it.name}">
+                    <el-input v-model="${formName}.${it.name}" type="textarea" placeholder="请输入${it.desc}内容"></el-input>
+                </el-form-item>`;
+                    case ColumnsHTMLType.select:
+                        return `
+                <el-form-item label="${it.desc}" prop="${it.name}">
+                    <el-select v-model="${formName}.${it.name}" placeholder="请选择${it.desc}">
+                        <el-option
+                            v-for="item in ${it.name}Group"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        />
+                    </el-select>
+                </el-form-item>`;
+                    case ColumnsHTMLType.radio:
+                        return `
+                <el-form-item label="状态" prop="${it.name}">
+                    <el-radio-group v-model="${formName}.${it.name}">
+                        <el-radio v-for="it in ${it.name}Group" :key="it.value" :label="it.value">{{
+                            it.label
+                        }}</el-radio>
+                    </el-radio-group>
+                </el-form-item>`;
+                    default:
+                        return ``;
+                }
+            })
+            .join('')}`;
+    }
+    /**
+     * 生成下拉单选的数据组
+     */
+    genGroupString() {
+        const list = this.entity.columns.filter(
+            it =>
+                it.htmlType === ColumnsHTMLType.radio ||
+                it.htmlType === ColumnsHTMLType.checkbox ||
+                it.htmlType === ColumnsHTMLType.select
+        );
+        return `${list
+            .map(it => {
+                return `
+const ${it.name}Group = [${it.enumValues
+                    .map(
+                        enumValue => `
+    { label: '${enumValue}', value: '${enumValue}' },`
+                    )
+                    .join('')}
+];`;
+            })
+            .join('')}`;
+    }
     genString() {
+        // 搜索表单
         const queryStr = this.genQueryString();
-        const tableColunmString =this.genTableColunmString()
+        // 表格
+        const tableColunmString = this.genTableColunmString();
+        // 添加表单
+        const addFormString = this.genFormStringFactory('add');
+        // 更新表单
+        const updateFormString = this.genFormStringFactory('update');
+        //
+        const groupString = this.genGroupString();
         // 表名
         const tableName = this.entity.name.replace(/Entity$/, '');
         const TableName = upperFirst(tableName);
-
+        const queryList = this.entity.columns.filter(it => it.isQuery);
+        const requiredList = this.entity.columns.filter(it => it.required);
         return `<template>
     <div class="app-container">
         <el-form v-show="showSearch" ref="queryRef" :model="queryParams" :inline="true">${queryStr}
@@ -180,23 +268,7 @@ export class FeRuoYiElementTemp {
 
         <!-- 添加对话框 -->
         <el-dialog v-model="addDialogVisible" title="添加字典类型" width="500px" append-to-body>
-            <el-form ref="addDictRef" :model="addForm" :rules="rules" label-width="80px">
-                <el-form-item label="字典名称" prop="title">
-                    <el-input v-model="addForm.title" placeholder="请输入字典名称" />
-                </el-form-item>
-                <el-form-item label="字典类型" prop="type">
-                    <el-input v-model="addForm.type" placeholder="请输入字典类型" />
-                </el-form-item>
-                <el-form-item label="状态" prop="status">
-                    <el-radio-group v-model="addForm.status">
-                        <el-radio v-for="dict in statusGroup" :key="dict.value" :label="dict.value">{{
-                            dict.label
-                        }}</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="备注" prop="remark">
-                    <el-input v-model="addForm.remark" type="textarea" placeholder="请输入内容"></el-input>
-                </el-form-item>
+            <el-form ref="add${TableName}Ref" :model="addForm" :rules="rules" label-width="80px">${addFormString}
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
@@ -207,23 +279,7 @@ export class FeRuoYiElementTemp {
         </el-dialog>
         <!-- 修改参数配置对话框 -->
         <el-dialog v-model="updateDialogVisible" title="修改字典类型" width="500px" append-to-body>
-            <el-form ref="updateDictRef" :model="updateForm" :rules="rules" label-width="80px">
-                <el-form-item label="字典名称" prop="title">
-                    <el-input v-model="updateForm.title" placeholder="请输入字典名称" />
-                </el-form-item>
-                <el-form-item label="字典类型" prop="type">
-                    <el-input v-model="updateForm.type" placeholder="请输入字典类型" />
-                </el-form-item>
-                <el-form-item label="状态" prop="status">
-                    <el-radio-group v-model="updateForm.status">
-                        <el-radio v-for="dict in statusGroup" :key="dict.value" :label="dict.value">{{
-                            dict.label
-                        }}</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="备注" prop="remark">
-                    <el-input v-model="updateForm.remark" type="textarea" placeholder="请输入内容"></el-input>
-                </el-form-item>
+            <el-form ref="update${TableName}Ref" :model="updateForm" :rules="rules" label-width="80px">${updateFormString}
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
@@ -235,7 +291,7 @@ export class FeRuoYiElementTemp {
     </div>
 </template>
 
-<script setup name="Dict" lang="ts">
+<script setup name="${TableName}" lang="ts">
 import { dateFormat } from '@zeronejs/utils';
 import { ref } from 'vue';
 import { ElMessage, FormInstance } from 'element-plus';
@@ -244,17 +300,19 @@ import { endOfDay } from 'date-fns';
 import { download } from '@/utils/request';
 import { cloneDeep } from 'lodash';
 // 接口
-import type { DictCreateDto, DictEntity, DictListWhereDto, DictUpdateDto } from '@/api/interface';
-import { postDictCreate } from '@/api/controller/dict/postDictCreate';
-import { patchDictUpdateById } from '@/api/controller/dict/patchDictUpdateById';
-import { postDictList } from '@/api/controller/dict/postDictList';
-import { getDictDetailsById } from '@/api/controller/dict/getDictDetailsById';
-import { postDictRemoves } from '@/api/controller/dict/postDictRemoves';
+import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto, ${TableName}UpdateDto } from '@/api/interface';
+import {
+    post${TableName}Create,
+    patch${TableName}UpdateById,
+    post${TableName}List,
+    get${TableName}DetailsById,
+    post${TableName}Removes,
+} from '@/api/controller';
 
 // 搜索栏
 const queryRef = ref<FormInstance>();
 
-const dictList = ref<DictEntity[]>([]);
+const ${tableName}List = ref<${TableName}Entity[]>([]);
 
 // 列表loading
 const loading = ref(true);
@@ -266,41 +324,44 @@ const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
 // 创建日期
-const dateRange = ref<Date[]>([]);
+const dateRange = ref<[Date, Date]>();
+${groupString}
 
-const statusGroup = [
-    { label: 'Normal', value: 'Normal' },
-    { label: 'Disable', value: 'Disable' },
-];
 const queryLimit = ref({
     page: 1,
     psize: 10,
 });
 // 列表请求参数
-const queryParams = ref<DictListWhereDto>({
-    title: undefined,
-    type: undefined,
-    status: undefined,
+const queryParams = ref<${TableName}ListWhereDto>({${queryList
+            .map(
+                it => `
+    ${it.name}: undefined,`
+            )
+            .join('')}
 });
-const rules = {
-    title: [{ required: true, message: '字典名称不能为空', trigger: 'blur' }],
-    type: [{ required: true, message: '字典类型不能为空', trigger: 'blur' }],
+const rules = {${requiredList
+            .map(
+                it => `
+    ${it.name}: [{ required: true, message: '${it.desc}不能为空', trigger: 'blur' }],`
+            )
+            .join('')}
 };
 
 /** 查询字典类型列表 */
 const getList = async () => {
     loading.value = true;
-    const { data } = await postDictList({
+    const createAtWhere = !dateRange.value
+        ? undefined
+        : [dateRange.value[0]?.toISOString(), endOfDay(dateRange.value[1]).toISOString()];
+
+    const { data } = await post${TableName}List({
         where: {
             ...queryParams.value,
-            createdAt:
-                dateRange.value.length === 0
-                    ? undefined
-                    : [dateRange.value[0]?.toISOString(), endOfDay(dateRange.value[1]).toISOString()],
+            createdAt: createAtWhere,
         },
         limit: queryLimit.value,
     });
-    dictList.value = data.data;
+    ${tableName}List.value = data.data;
     total.value = data.total;
     loading.value = false;
 };
@@ -311,13 +372,13 @@ const handleQuery = () => {
 };
 /** 重置按钮操作 */
 const resetQuery = () => {
-    dateRange.value = [];
+    dateRange.value = undefined;
     queryRef.value?.resetFields();
     handleQuery();
 };
 // 新增/编辑弹窗通用逻辑
-const useDictDialog = <T extends DictCreateDto | DictUpdateDto>(initFormValue: T) => {
-    const dictRef = ref<FormInstance>();
+const use${TableName}Dialog = <T extends ${TableName}CreateDto | ${TableName}UpdateDto>(initFormValue: T) => {
+    const ${tableName}Ref = ref<FormInstance>();
     const dialogVisible = ref(false);
     const editForm = ref(cloneDeep(initFormValue));
     /** 取消按钮 */
@@ -329,11 +390,11 @@ const useDictDialog = <T extends DictCreateDto | DictUpdateDto>(initFormValue: T
     const reset = () => {
         fromId.value = 0;
         editForm.value = cloneDeep(initFormValue);
-        dictRef.value?.resetFields();
+        ${tableName}Ref.value?.resetFields();
     };
 
     return {
-        dictRef,
+        ${tableName}Ref,
         dialogVisible,
         editForm,
         cancel,
@@ -342,13 +403,13 @@ const useDictDialog = <T extends DictCreateDto | DictUpdateDto>(initFormValue: T
 };
 const fromId = ref(0);
 
-const initAddFormValue: DictCreateDto = {
+const initAddFormValue: ${TableName}CreateDto = {
     title: '',
     status: 'Normal',
     remark: '',
     type: '',
 };
-const initUpadteFormValue: DictUpdateDto = {
+const initUpadteFormValue: ${TableName}UpdateDto = {
     title: '',
     status: 'Normal',
     remark: '',
@@ -357,28 +418,28 @@ const initUpadteFormValue: DictUpdateDto = {
 
 /** 新增表单相关 */
 const {
-    dictRef: addDictRef,
+    ${tableName}Ref: add${TableName}Ref,
     dialogVisible: addDialogVisible,
     editForm: addForm,
     cancel: addCancel,
     reset: addReset,
-} = useDictDialog(initAddFormValue);
+} = use${TableName}Dialog(initAddFormValue);
 /** 编辑表单相关 */
 const {
-    dictRef: updateDictRef,
+    ${tableName}Ref: update${TableName}Ref,
     dialogVisible: updateDialogVisible,
     editForm: updateForm,
     cancel: updateCancel,
     reset: updateReset,
-} = useDictDialog(initUpadteFormValue);
+} = use${TableName}Dialog(initUpadteFormValue);
 /** 提交添加表单 */
 const submitAddForm = async () => {
     try {
-        await addDictRef.value?.validate();
+        await add${TableName}Ref.value?.validate();
     } catch (e) {
         return console.log(e);
     }
-    await postDictCreate(addForm.value);
+    await post${TableName}Create(addForm.value);
     ElMessage.success('新增成功');
     addDialogVisible.value = false;
     getList();
@@ -386,11 +447,11 @@ const submitAddForm = async () => {
 /** 提交修改表单 */
 const submitUpdateForm = async () => {
     try {
-        await updateDictRef.value?.validate();
+        await update${TableName}Ref.value?.validate();
     } catch (e) {
         return console.log(e);
     }
-    await patchDictUpdateById({ id: fromId.value }, updateForm.value);
+    await patch${TableName}UpdateById({ id: fromId.value }, updateForm.value);
     ElMessage.success('修改成功');
     updateDialogVisible.value = false;
     getList();
@@ -401,42 +462,42 @@ const handleAdd = () => {
     addDialogVisible.value = true;
 };
 /** 多选框选中数据 */
-const handleSelectionChange = (selection: DictEntity[]) => {
+const handleSelectionChange = (selection: ${TableName}Entity[]) => {
     ids.value = selection.map(item => item.id);
     single.value = selection.length !== 1;
     multiple.value = !selection.length;
 };
 /** 修改按钮操作 */
-const handleUpdate = async (row?: DictEntity) => {
+const handleUpdate = async (row?: ${TableName}Entity) => {
     updateReset();
-    const dictId = row ? row.id : ids.value[0];
+    const ${tableName}Id = row ? row.id : ids.value[0];
 
-    const { data } = await getDictDetailsById({ id: dictId });
-    fromId.value = dictId;
+    const { data } = await get${TableName}DetailsById({ id: ${tableName}Id });
+    fromId.value = ${tableName}Id;
     updateForm.value = data.data;
     updateDialogVisible.value = true;
 };
 
 /** 删除按钮操作 */
-const handleDelete = async (row?: DictEntity) => {
-    const dictIds = row ? [row.id] : ids.value;
+const handleDelete = async (row?: ${TableName}Entity) => {
+    const ${tableName}Ids = row ? [row.id] : ids.value;
     try {
-        await ElModalConfirm('是否确认删除字典编号为"' + dictIds + '"的数据项？');
+        await ElModalConfirm('是否确认删除字典编号为"' + ${tableName}Ids.join(',') + '"的数据项？');
     } catch (e) {
         return console.log(e);
     }
-    await postDictRemoves({ ids: dictIds });
+    await post${TableName}Removes({ ids: ${tableName}Ids });
     getList();
     ElMessage.success('删除成功');
 };
 /** 导出按钮操作 */
 function handleExport() {
     download(
-        'system/dict/type/export',
+        'system/${tableName}/type/export',
         {
             ...queryParams.value,
         },
-        \`dict_\${new Date().getTime()}.xlsx\`
+        \`${tableName}_\${new Date().getTime()}.xlsx\`
     );
 }
 
