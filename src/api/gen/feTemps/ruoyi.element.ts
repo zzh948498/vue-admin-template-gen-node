@@ -1,4 +1,4 @@
-import { ColumnsHTMLType } from '../entities/genColumns.entity';
+import { ColumnsHTMLType, ColumnsType } from '../entities/genColumns.entity';
 import { GenTableEntity } from '../entities/genTable.entity';
 import { upperFirst } from 'lodash';
 export class FeRuoYiElementTemp {
@@ -139,6 +139,13 @@ export class FeRuoYiElementTemp {
         );
         return `${list
             .map(it => {
+                if(it.tsType ===ColumnsType.boolean){
+                    return `
+const ${it.name}Group = [
+    { label: '是', value: true },
+    { label: '否', value: false },
+];`
+                }
                 return `
 const ${it.name}Group = [${it.enumValues
                     .map(
