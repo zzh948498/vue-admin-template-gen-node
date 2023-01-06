@@ -9,6 +9,7 @@ import { ColumnsType } from './entities/genColumns.entity';
 import { writeFile } from 'fs-extra';
 import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
 import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
+import { FeElementPlusTemp } from './feTemps/element.plus';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -198,7 +199,7 @@ ${relationsStr}
             // writeFile(Date.now() + lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
             zip.file(lowerFirst(entity.name).replace(/Entity$/, '') + '.entity.ts', strs[idx]);
             // 前端代码
-            const temp = new FeRuoYiElementTemp(entity);
+            const temp = new FeElementPlusTemp(entity);
             zip.file(upperFirst(entity.name).replace(/Entity$/, '') + '.vue', temp.genString());
         });
         return zip.generateAsync({
