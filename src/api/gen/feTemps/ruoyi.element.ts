@@ -1,6 +1,6 @@
 import { ColumnsHTMLType, ColumnsType } from '../entities/genColumns.entity';
 import { GenTableEntity } from '../entities/genTable.entity';
-import { upperFirst } from 'lodash';
+import { upperFirst, lowerFirst } from 'lodash';
 export class FeRuoYiElementTemp {
     entity: GenTableEntity;
     constructor(entity: GenTableEntity) {
@@ -31,7 +31,7 @@ export class FeRuoYiElementTemp {
                 <el-select v-model="queryParams.${it.name}" placeholder="请选择${it.desc}" clearable style="width: 240px">
                     <el-option
                         v-for="item in ${it.name}Group"
-                        :key="item.value"
+                        :key="item.label"
                         :label="item.label"
                         :value="item.value"
                     />
@@ -60,7 +60,7 @@ export class FeRuoYiElementTemp {
                 <template #default="scope">
                     <template v-for="item in ${it.name}Group">
                         <template v-if="scope.row.${it.name} === item.value">
-                            <el-tag :key="item.value">{{ item.label }}</el-tag>
+                            <el-tag :key="item.label">{{ item.label }}</el-tag>
                         </template>
                     </template>
                 </template>
@@ -106,7 +106,7 @@ export class FeRuoYiElementTemp {
                     <el-select v-model="${formName}.${it.name}" placeholder="请选择${it.desc}">
                         <el-option
                             v-for="item in ${it.name}Group"
-                            :key="item.value"
+                            :key="item.label"
                             :label="item.label"
                             :value="item.value"
                         />
@@ -116,7 +116,7 @@ export class FeRuoYiElementTemp {
                         return `
                 <el-form-item label="状态" prop="${it.name}">
                     <el-radio-group v-model="${formName}.${it.name}">
-                        <el-radio v-for="it in ${it.name}Group" :key="it.value" :label="it.value">{{
+                        <el-radio v-for="it in ${it.name}Group" :key="it.label" :label="it.value">{{
                             it.label
                         }}</el-radio>
                     </el-radio-group>
@@ -139,12 +139,12 @@ export class FeRuoYiElementTemp {
         );
         return `${list
             .map(it => {
-                if(it.tsType ===ColumnsType.boolean){
+                if (it.tsType === ColumnsType.boolean) {
                     return `
 const ${it.name}Group = [
     { label: '是', value: true },
     { label: '否', value: false },
-];`
+];`;
                 }
                 return `
 const ${it.name}Group = [${it.enumValues
@@ -169,7 +169,7 @@ const ${it.name}Group = [${it.enumValues
         //
         const groupString = this.genGroupString();
         // 表名
-        const tableName = this.entity.name.replace(/Entity$/, '');
+        const tableName = lowerFirst(this.entity.name.replace(/Entity$/, ''));
         const TableName = upperFirst(tableName);
         const queryList = this.entity.columns.filter(it => it.isQuery);
         const requiredList = this.entity.columns.filter(it => it.required);
@@ -301,13 +301,12 @@ const ${it.name}Group = [${it.enumValues
 <script setup name="${TableName}" lang="ts">
 import { dateFormat } from '@zeronejs/utils';
 import { ref } from 'vue';
-import { ElMessage, FormInstance } from 'element-plus';
-import { ElModalConfirm } from '@/plugins/ElModal';
+import { ElMessage, FormInstance, ElMessageBox } from 'element-plus';
 import { endOfDay } from 'date-fns';
 import { download } from '@/utils/request';
 import { cloneDeep } from 'lodash';
 // 接口
-import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto, ${TableName}UpdateDto } from '@/api/interface';
+import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto, ${TableName}UpdateDto, DeepRequired } from '@/api/interface';
 import {
     post${TableName}Create,
     patch${TableName}UpdateById,
@@ -319,7 +318,7 @@ import {
 // 搜索栏
 const queryRef = ref<FormInstance>();
 
-const ${tableName}List = ref<${TableName}Entity[]>([]);
+const ${tableName}List = ref<DeepRequired<${TableName}Entity[]>>([]);
 
 // 列表loading
 const loading = ref(true);
@@ -469,13 +468,13 @@ const handleAdd = () => {
     addDialogVisible.value = true;
 };
 /** 多选框选中数据 */
-const handleSelectionChange = (selection: ${TableName}Entity[]) => {
+const handleSelectionChange = (selection: DeepRequired<${TableName}Entity[]>) => {
     ids.value = selection.map(item => item.id);
     single.value = selection.length !== 1;
     multiple.value = !selection.length;
 };
 /** 修改按钮操作 */
-const handleUpdate = async (row?: ${TableName}Entity) => {
+const handleUpdate = async (row?: DeepRequired<${TableName}Entity>) => {
     updateReset();
     const ${tableName}Id = row ? row.id : ids.value[0];
 
@@ -486,10 +485,18 @@ const handleUpdate = async (row?: ${TableName}Entity) => {
 };
 
 /** 删除按钮操作 */
-const handleDelete = async (row?: ${TableName}Entity) => {
+const handleDelete = async (row?: DeepRequired<${TableName}Entity>) => {
     const ${tableName}Ids = row ? [row.id] : ids.value;
     try {
-        await ElModalConfirm('是否确认删除字典编号为"' + ${tableName}Ids.join(',') + '"的数据项？');
+        await ElMessageBox.confirm(
+            '是否确认删除字典编号为"' + ${tableName}Ids.join(',') + '"的数据项？',
+            '系统提示',
+            {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning',
+            }
+        );
     } catch (e) {
         return console.log(e);
     }
