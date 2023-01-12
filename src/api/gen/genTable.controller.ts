@@ -8,6 +8,7 @@ import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse'
 import { BodyIdsDto } from '@common/BodyIds.dto';
 import { Limit } from '@common/utils/constants';
 import { Response } from 'express';
+import { GenTableGenCodeDto } from './dto/genTable-genCode.dto';
 @ApiTags('genTable')
 @ApiBearerAuth()
 @ApiExtraModels(GenTableEntity)
@@ -105,8 +106,18 @@ export class GenTableController {
     @ApiOperation({ summary: '生成代码' })
     @ApiRPrimitiveOfResponse('number', 'array')
     @Post('/genCode')
-    async genCode(@Body() dto: BodyIdsDto) {
+    async genCode(@Body() dto: GenTableGenCodeDto) {
         const data = await this.genTableService.genCode(dto.ids);
+        return new RDto({ data: data });
+    }
+    /**
+     * 模板列表
+     */
+    @ApiOperation({ summary: '模板列表' })
+    @ApiRPrimitiveOfResponse('string', 'array')
+    @Get('/genCode/templates')
+    async genTemplates() {
+        const data = this.genTableService.templates.map(it => it.name);
         return new RDto({ data: data });
     }
 }

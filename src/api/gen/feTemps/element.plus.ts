@@ -1,7 +1,8 @@
 import { ColumnsHTMLType, ColumnsType, GenColumnsEntity } from '../entities/genColumns.entity';
 import { GenTableEntity } from '../entities/genTable.entity';
 import { upperFirst, lowerFirst } from 'lodash';
-export class FeElementPlusTemp {
+import { FeTempsFactory } from './feTempsFactory';
+export class FeElementPlusTemp extends FeTempsFactory {
     entity: GenTableEntity;
     // 搜索列表
     queryList: GenColumnsEntity[];
@@ -10,6 +11,7 @@ export class FeElementPlusTemp {
     // 表格列表
     tableList: GenColumnsEntity[];
     constructor(entity: GenTableEntity) {
+        super(entity)
         this.entity = entity;
         this.queryList = this.entity.columns.filter(it => it.isQuery);
         this.requiredList = this.entity.columns.filter(it => it.required);

@@ -1,9 +1,11 @@
 import { ColumnsHTMLType, ColumnsType } from '../entities/genColumns.entity';
 import { GenTableEntity } from '../entities/genTable.entity';
 import { upperFirst, lowerFirst } from 'lodash';
-export class FeRuoYiElementTemp {
+import { FeTempsFactory } from './feTempsFactory';
+export class FeRuoYiElementTemp extends FeTempsFactory {
     entity: GenTableEntity;
     constructor(entity: GenTableEntity) {
+        super(entity);
         this.entity = entity;
     }
     // 生成搜索栏代码

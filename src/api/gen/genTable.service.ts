@@ -10,10 +10,14 @@ import { writeFile } from 'fs-extra';
 import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
 import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
 import { FeElementPlusTemp } from './feTemps/element.plus';
+import { FeTempsFactory } from './feTemps/feTempsFactory';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
-
+    templates: { name: string; tempClass: typeof FeTempsFactory }[] = [
+        { name: 'element-plus', tempClass: FeElementPlusTemp },
+        { name: 'ruoyi', tempClass: FeRuoYiElementTemp },
+    ];
     async create(entity: GenTableCreateDto) {
         return this.genTableRepository.save(entity);
     }
