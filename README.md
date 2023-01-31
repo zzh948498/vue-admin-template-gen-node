@@ -9,7 +9,26 @@
 ## Installation
 
 ```bash
-$ pnpm i 
+$ pnpm i
+```
+
+## Database
+`/src/app.module.ts`
+```ts
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'root',
+      database: 'test',
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+  ],
+})
 ```
 
 ## Running the app
