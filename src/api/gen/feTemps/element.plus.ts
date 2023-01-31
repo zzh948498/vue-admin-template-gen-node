@@ -11,7 +11,7 @@ export class FeElementPlusTemp extends FeTempsFactory {
     // 表格列表
     tableList: GenColumnsEntity[];
     constructor(entity: GenTableEntity) {
-        super(entity)
+        super(entity);
         this.entity = entity;
         this.queryList = this.entity.columns.filter(it => it.isQuery);
         this.requiredList = this.entity.columns.filter(it => it.required);
@@ -36,10 +36,11 @@ export class FeElementPlusTemp extends FeTempsFactory {
                 />
             </el-form-item>`;
                     case ColumnsHTMLType.select:
+                    case ColumnsHTMLType.checkbox:
                     case ColumnsHTMLType.radio:
                         return ` 
             <el-form-item label="${it.desc}" prop="${it.name}">
-                <el-select v-model="queryParams.${it.name}" placeholder="请选择${it.desc}" clearable style="width: 240px">
+                <el-select v-model="queryParams.${it.name}" placeholder="请选择${it.desc}" clearable style="width: 240px" @change="handleQuery">
                     <el-option
                         v-for="item in ${it.name}Group"
                         :key="item.label"
