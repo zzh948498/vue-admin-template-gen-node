@@ -9,20 +9,20 @@
 ## Installation
 
 ```bash
-$ npm install
+$ pnpm i 
 ```
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+$ pnpm dev
 
 # watch mode
-$ npm run start:dev
+$ pnpm start:dev
 
 # production mode
-$ npm run start:prod
+$ pnpm start:prod
 ```
 
 ## Test
