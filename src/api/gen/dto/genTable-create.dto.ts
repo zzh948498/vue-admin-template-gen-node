@@ -28,4 +28,3 @@ export class GenTableCreateDto {
     })
     tplCategory: TemplateCategory;
 }
-            

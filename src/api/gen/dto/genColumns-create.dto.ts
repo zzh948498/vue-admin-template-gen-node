@@ -84,4 +84,3 @@ export class GenColumnsCreateDto {
     })
     tableId: number;
 }
-            

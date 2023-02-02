@@ -17,7 +17,7 @@ export enum Gender {
  * 用户表
  */
 @Entity()
-export class UserEntity extends BaseEntity{
+export class UserEntity extends BaseEntity {
     /**
      * id
      */

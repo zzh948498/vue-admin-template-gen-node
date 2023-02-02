@@ -11,7 +11,7 @@ import { createAdminOption } from '@common/admin/adminOption';
 import { GenModule } from '@api/gen/gen.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from '@common/filters/httpException.filter';
-// import { DictModule } from "@api/dict/dict.module";
+import { DictModule } from '@api/dict/dict.module';
 
 Resource.validate = validate;
 AdminJS.registerAdapter({ Database, Resource });
@@ -31,7 +31,7 @@ AdminJS.registerAdapter({ Database, Resource });
         AdminModule.createAdminAsync(createAdminOption()),
         ConfigModule.forRoot(),
         GenModule,
-        // DictModule
+        DictModule,
     ],
     controllers: [AppController],
     providers: [

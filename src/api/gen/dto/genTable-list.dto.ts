@@ -35,4 +35,3 @@ export class GenTableListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
-     

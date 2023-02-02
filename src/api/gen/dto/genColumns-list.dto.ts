@@ -75,4 +75,3 @@ export class GenColumnsListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
-     

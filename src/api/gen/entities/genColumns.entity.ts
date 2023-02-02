@@ -23,11 +23,11 @@ export enum ColumnsHTMLType {
     input = 'input',
     /**
      * 文本域
-     */ 
+     */
     textarea = 'textarea',
     /**
      * 下拉框
-     */ 
+     */
     select = 'select',
     /**
      * 单选框

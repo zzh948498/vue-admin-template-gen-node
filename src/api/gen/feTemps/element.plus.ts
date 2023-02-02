@@ -77,6 +77,20 @@ export class FeElementPlusTemp extends FeTempsFactory {
                     </template>
                 </template>
             </el-table-column>`;
+                    case ColumnsHTMLType.checkbox:
+                        return `
+            <el-table-column label="${it.desc}" align="center" prop="${it.name}">
+                <template #default="scope">
+                    <el-tag v-for="item in scope.row.${it.name}" :key="item" class="ml-2">{{ item }}</el-tag>
+                </template>
+            </el-table-column>`;
+                    case ColumnsHTMLType.datetime:
+                        return `
+            <el-table-column label="${it.desc}" align="center" prop="${it.name}" width="180">
+                <template #default="scope">
+                    <span>{{ dateFormat(scope.row.${it.name}) }}</span>
+                </template>
+            </el-table-column>`;
                     default:
                         return ``;
                 }
@@ -120,12 +134,26 @@ export class FeElementPlusTemp extends FeTempsFactory {
                 </el-form-item>`;
                     case ColumnsHTMLType.radio:
                         return `
-                <el-form-item ${showStr}label="状态" prop="${it.name}">
+                <el-form-item ${showStr}label="${it.desc}" prop="${it.name}">
                     <el-radio-group v-model="editForm.${it.name}" ${disabledStr}>
                         <el-radio v-for="it in ${it.name}Group" :key="it.label" :label="it.value">{{
                             it.label
                         }}</el-radio>
                     </el-radio-group>
+                </el-form-item>`;
+                    case ColumnsHTMLType.checkbox:
+                        return `
+                <el-form-item ${showStr}label="${it.desc}" prop="${it.name}">
+                    <el-checkbox-group v-model="editForm.${it.name}" ${disabledStr}>
+                        <el-checkbox v-for="it in ${it.name}Group" :key="it.label" :label="it.value">{{
+                            it.label
+                        }}</el-checkbox>
+                    </el-checkbox-group>
+                </el-form-item>`;
+                    case ColumnsHTMLType.datetime:
+                        return `
+                <el-form-item ${showStr}label="${it.desc}" prop="${it.name}">
+                    <el-date-picker v-model="editForm.${it.name}" type="date" placeholder="请选择日期"  ${disabledStr}/>
                 </el-form-item>`;
                     default:
                         return ``;
@@ -172,10 +200,10 @@ const ${it.name}Group = [${it.enumValues
             .map(it => {
                 switch (it.tsType) {
                     case 'string':
+                    case 'Date':
                         return `
     ${isReset ? '   ' : ''}${it.name}: '',`;
                     case 'number':
-                    case 'Date':
                         return `
     ${isReset ? '   ' : ''}${it.name}: 0,`;
                     case 'boolean':
@@ -220,7 +248,7 @@ const ${it.name}Group = [${it.enumValues
             </el-form-item>
         </el-form>
 
-        <el-row :gutter="10" class="mb8">
+        <el-row :gutter="10" class="mb-2">
             <el-col :span="1.5">
                 <el-button
                     type="primary"
@@ -251,7 +279,7 @@ const ${it.name}Group = [${it.enumValues
                     <span>{{ dateFormat(scope.row.createdAt) }}</span>
                 </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <el-table-column label="操作" align="center" width="250" class-name="small-padding fixed-width">
                 <template #default="scope">
                     <el-button
                         link

@@ -50,5 +50,4 @@ export class DictDataCreateDto {
         message: 'dictId不能为空',
     })
     dictId: number;
-
 }

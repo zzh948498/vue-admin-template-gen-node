@@ -11,6 +11,7 @@ import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.en
 import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
 import { FeElementPlusTemp } from './feTemps/element.plus';
 import { FeTempsFactory } from './feTemps/feTempsFactory';
+import { join } from 'path';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
@@ -199,13 +200,15 @@ ${relationsStr}
 `;
         });
         const zip = new JSZip();
-        entities.map((entity, idx) => {
-            // writeFile(Date.now() + lowerFirst(entity.name).replace(/Entity$/, '.entity.ts'), strs[idx]);
+        for (let idx = 0; idx < entities.length; idx++) {
+            const entity = entities[idx];
             zip.file(lowerFirst(entity.name).replace(/Entity$/, '') + '.entity.ts', strs[idx]);
             // 前端代码
             const temp = new FeElementPlusTemp(entity);
-            zip.file(upperFirst(entity.name).replace(/Entity$/, '') + '.vue', temp.genString());
-        });
+            const feString = temp.genString();
+            zip.file(upperFirst(entity.name).replace(/Entity$/, '') + '.vue', feString);
+        }
+
         return zip.generateAsync({
             // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
             type: 'array',

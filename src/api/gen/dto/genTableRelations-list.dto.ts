@@ -45,4 +45,3 @@ export class GenTableRelationsListDto {
     @Type(() => Limit)
     limit?: Limit;
 }
-     

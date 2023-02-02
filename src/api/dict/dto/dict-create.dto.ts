@@ -30,5 +30,4 @@ export class DictCreateDto {
         message: '字典类型不能为空',
     })
     type: string;
-
 }

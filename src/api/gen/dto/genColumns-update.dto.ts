@@ -62,4 +62,3 @@ export class GenColumnsUpdateDto {
     @IsOptional()
     tableId?: number;
 }
-            

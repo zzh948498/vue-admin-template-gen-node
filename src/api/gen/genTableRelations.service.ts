@@ -1,11 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { GenTableRelationsCreateDto, GenTableRelationsListDto, GenTableRelationsAllDto, GenTableRelationsUpdateDto } from './dto';
+import {
+    GenTableRelationsCreateDto,
+    GenTableRelationsListDto,
+    GenTableRelationsAllDto,
+    GenTableRelationsUpdateDto,
+} from './dto';
 import { GenTableRelationsEntity } from './entities/genTableRelations.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 @Injectable()
 export class GenTableRelationsService {
-    constructor(@InjectRepository(GenTableRelationsEntity) private genTableRelationsRepository: Repository<GenTableRelationsEntity>) {}
+    constructor(
+        @InjectRepository(GenTableRelationsEntity)
+        private genTableRelationsRepository: Repository<GenTableRelationsEntity>
+    ) {}
 
     async create(entity: GenTableRelationsCreateDto) {
         return this.genTableRelationsRepository.save(entity);

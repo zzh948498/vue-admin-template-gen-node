@@ -30,4 +30,3 @@ export class GenTableAllDto {
     @Type(() => GenTableAllWhereDto)
     where?: GenTableAllWhereDto;
 }
-     

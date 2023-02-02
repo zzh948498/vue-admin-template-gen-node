@@ -1,4 +1,4 @@
-import { GenTableEntity } from "../entities/genTable.entity";
+import { GenTableEntity } from '../entities/genTable.entity';
 
 export abstract class FeTempsFactory {
     constructor(protected entity: GenTableEntity) {}

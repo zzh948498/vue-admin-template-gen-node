@@ -40,4 +40,3 @@ export class GenTableRelationsAllDto {
     @Type(() => GenTableRelationsAllWhereDto)
     where?: GenTableRelationsAllWhereDto;
 }
-     

@@ -24,13 +24,13 @@ export class DictEntity extends BaseEntity {
      */
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     /**
      * 字典名称
      */
     @Column()
     title: string;
-    
+
     /**
      * 状态
      */
@@ -39,7 +39,7 @@ export class DictEntity extends BaseEntity {
         enum: DictEntityStatusEnum,
     })
     status: DictEntityStatusEnum;
-    
+
     /**
      * 备注
      */
@@ -47,13 +47,13 @@ export class DictEntity extends BaseEntity {
         nullable: true,
     })
     remark?: string;
-    
+
     /**
      * 字典类型
      */
     @Column()
     type: string;
-    
+
     /**
      * 创建时间
      */
@@ -68,8 +68,6 @@ export class DictEntity extends BaseEntity {
     /**
      * dictDatas
      */
-    @OneToMany(() => DictDataEntity, dictDatas => dictDatas.dict) 
+    @OneToMany(() => DictDataEntity, dictDatas => dictDatas.dict)
     dictDatas: DictDataEntity[];
-                    
 }
-

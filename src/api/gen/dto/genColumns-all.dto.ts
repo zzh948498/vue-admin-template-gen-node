@@ -70,4 +70,3 @@ export class GenColumnsAllDto {
     @Type(() => GenColumnsAllWhereDto)
     where?: GenColumnsAllWhereDto;
 }
-     

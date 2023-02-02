@@ -25,19 +25,19 @@ export class DictDataEntity extends BaseEntity {
      */
     @PrimaryGeneratedColumn()
     id: number;
-    
+
     /**
      * 字典标签
      */
     @Column()
     label: string;
-    
+
     /**
      * 字典排序
      */
     @Column()
     sort: number;
-    
+
     /**
      * 是否默认
      */
@@ -45,13 +45,13 @@ export class DictDataEntity extends BaseEntity {
         nullable: true,
     })
     isDefault?: boolean;
-    
+
     /**
      * 字典键值
      */
     @Column()
     value: string;
-    
+
     /**
      * 状态
      */
@@ -61,7 +61,7 @@ export class DictDataEntity extends BaseEntity {
         enum: DictDataEntityStatusEnum,
     })
     status?: DictDataEntityStatusEnum;
-    
+
     /**
      * 备注
      */
@@ -69,7 +69,7 @@ export class DictDataEntity extends BaseEntity {
         nullable: true,
     })
     remark?: string;
-    
+
     /**
      * 创建时间
      */
@@ -85,14 +85,12 @@ export class DictDataEntity extends BaseEntity {
      * dict
      */
     @ManyToOne(() => DictEntity, dict => dict.dictDatas)
-    @JoinColumn({ name: 'dictId' }) 
+    @JoinColumn({ name: 'dictId' })
     dict: DictEntity;
-                    
+
     /**
      * dictId
      */
     @Column({ name: 'dictId' })
-    dictId: number; 
-    
+    dictId: number;
 }
-
