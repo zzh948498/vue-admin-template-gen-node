@@ -11,6 +11,8 @@ import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.en
 import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
 import { FeElementPlusTemp } from './feTemps/element.plus';
 import { FeTempsFactory } from './feTemps/feTempsFactory';
+import { Project } from 'ts-morph';
+
 import { join } from 'path';
 @Injectable()
 export class GenTableService {
@@ -218,5 +220,30 @@ ${relationsStr}
                 level: 9,
             },
         });
+    }
+    async importInterface(interfaceText: string) {
+        const project = new Project();
+        const sourceFile = project.createSourceFile('test.ts', interfaceText);
+        const interfaces = sourceFile.getInterfaces();
+        if (interfaces.length !== 1) {
+            throw new BadRequestException('interface有且只有一个');
+        }
+        const [interfaceDeclaration] = interfaces;
+        const properties = interfaceDeclaration.getProperties();
+        return properties.map(it => {
+            const name = it.getName();
+            const [jsDocs] = it.getJsDocs();
+            const jsDocsName = jsDocs?.getComment() ?? '';
+            const type1 = it.getType();
+            const typeName = type1.getText();
+            const hasQuestionToken = it.hasQuestionToken();
+            return {
+                name,
+                desc: jsDocsName,
+                tsType: typeName,
+                hasQuestionToken: hasQuestionToken,
+            };
+        });
+       
     }
 }

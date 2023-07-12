@@ -7,11 +7,12 @@ import { RDto, RListDto } from '@common/Result.dto';
 import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
 import { BodyIdsDto } from '@common/BodyIds.dto';
 import { Limit } from '@common/utils/constants';
-import { Response } from 'express';
 import { GenTableGenCodeDto } from './dto/genTable-genCode.dto';
+import { GenTableImportInterfaceDto } from './dto/genTable-importInterface.dto';
+import { GenTableImportInterfaceResultDto } from './dto/genTable-importInterface-result.dto';
 @ApiTags('genTable')
 @ApiBearerAuth()
-@ApiExtraModels(GenTableEntity)
+@ApiExtraModels(GenTableEntity, GenTableImportInterfaceResultDto)
 @ApiHeader({
     name: 'Authorization',
     description: 'Custom token',
@@ -108,6 +109,16 @@ export class GenTableController {
     @Post('/genCode')
     async genCode(@Body() dto: GenTableGenCodeDto) {
         const data = await this.genTableService.genCode(dto.ids);
+        return new RDto({ data: data });
+    }
+    /**
+     * 导入interface
+     */
+    @ApiOperation({ summary: '导入interface' })
+    @ApiROfResponse(GenTableImportInterfaceResultDto,'array')
+    @Post('/importInterface')
+    async importInterface(@Body() dto: GenTableImportInterfaceDto) {
+        const data = await this.genTableService.importInterface(dto.interface);
         return new RDto({ data: data });
     }
     /**
