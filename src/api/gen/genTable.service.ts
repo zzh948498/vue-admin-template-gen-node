@@ -240,10 +240,9 @@ ${relationsStr}
             return {
                 name,
                 desc: jsDocsName,
-                tsType: typeName,
+                tsType: Object.values(ColumnsType).includes(typeName as any) ? typeName : 'string',
                 hasQuestionToken: hasQuestionToken,
             };
         });
-       
     }
 }

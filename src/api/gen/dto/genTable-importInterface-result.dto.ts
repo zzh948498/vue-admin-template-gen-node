@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsString } from 'class-validator';
+import { ColumnsType } from '../entities/genColumns.entity';
 
 export class GenTableImportInterfaceResultDto {
     /**
@@ -16,7 +17,7 @@ export class GenTableImportInterfaceResultDto {
      * tsType
      */
     @ApiProperty()
-    tsType: string;
+    tsType: ColumnsType;
     /**
      * hasQuestionToken
      */
