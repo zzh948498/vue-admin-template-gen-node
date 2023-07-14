@@ -317,7 +317,7 @@ const ${it.name}Group = [${it.enumValues
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
-                    <el-button type="primary" @click="submitForm">确 定</el-button>
+                    <el-button type="primary" :loading="submitLoading" @click="submitForm">确 定</el-button>
                     <el-button @click="cancel">取 消</el-button>
                 </div>
             </template>
@@ -378,15 +378,19 @@ const getList = async () => {
     const createAtWhere = !dateRange.value
         ? undefined
         : [dateRange.value[0]?.toISOString(), endOfDay(dateRange.value[1]).toISOString()];
-
-    const { data } = await get${TableName}({
-        query: { ...queryParams.value },
-        page: queryLimit.value.page - 1,
-        size: queryLimit.value.psize,
-    });
-    ${tableName}List.value = data.data.content;
-    total.value = data.data.totalElements;
-    loading.value = false;
+    try {
+        const { data } = await get${TableName}({
+            query: { ...queryParams.value },
+            page: queryLimit.value.page,
+            size: queryLimit.value.psize,
+        });
+        loading.value = false;
+        ${tableName}List.value = data.data.content;
+        total.value = data.data.totalElements;
+    } catch (e) {
+        console.error(e);
+        loading.value = false;
+    }
 };
 getList();
 /** 搜索按钮操作 */
@@ -446,7 +450,7 @@ const handleUpdate = async (row: DeepRequired<${TableName}Entity>) => {
     reset();
     isAddDialog.value = false;
     const selectId = row ? row.id : ids.value[0];
-
+    // 如果需要从接口获取详情
     const { data } = await get${TableName}ById({ id: selectId });
     fromId.value = selectId;
     editForm.value = data.data;
@@ -457,16 +461,25 @@ const submitForm = async () => {
     try {
         await editFormRef.value?.validate();
     } catch (e) {
-        return console.log(e);
+        return console.error(e);
     }
-    if (!fromId.value) {
-        await post${TableName}(editForm.value);
-    } else {
-        await patch${TableName}ById({ id: fromId.value }, editForm.value);
+    submitLoading.value = true;
+    try {
+        if (!fromId.value) {
+            // 新增
+            await post${TableName}(editForm.value);
+        } else {
+            // 修改
+            await patch${TableName}ById({ id: fromId.value }, editForm.value);
+        }
+        submitLoading.value = false;
+        ElMessage.success('操作成功');
+        editDialogVisible.value = false;
+        getList();
+    } catch (e) {
+        submitLoading.value = false;
+        console.error(e);
     }
-    ElMessage.success('操作成功');
-    editDialogVisible.value = false;
-    getList();
 };
 /** 删除按钮操作 */
 const handleDelete = async (row?: DeepRequired<${TableName}Entity>) => {
@@ -476,17 +489,25 @@ const handleDelete = async (row?: DeepRequired<${TableName}Entity>) => {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
+            beforeClose: async (action, instance, done) => {
+                if (action === 'confirm') {
+                    instance.confirmButtonLoading = true;
+                    await Promise.all(
+                        selectIds.map(id => {
+                            return delete${TableName}ById({ id });
+                        })
+                    );
+                    done();
+                    getList();
+                    ElMessage.success('删除成功');
+                } else {
+                    done();
+                }
+            },
         });
     } catch (e) {
-        return console.log(e);
+        return console.error(e);
     }
-    await Promise.all(
-        selectIds.map(id => {
-            return delete${TableName}ById({ id });
-        })
-    );
-    getList();
-    ElMessage.success('删除成功');
 };
 </script>
 
