@@ -271,7 +271,7 @@ const ${it.name}Group = [${it.enumValues
             <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
         <!-- ${this.entity.desc} -->
-        <el-table v-loading="loading" :data="${tableName}List" @selectionChange="handleSelectionChange">
+        <el-table ref="tableRef" v-loading="loading" :data="${tableName}List" :max-height="height - top - 116" @selectionChange="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />${tableColunmString}
         
             <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
@@ -331,6 +331,7 @@ import { ref } from 'vue';
 import { ElMessage, FormInstance, ElMessageBox } from 'element-plus';
 import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue';
 import { endOfDay } from 'date-fns';
+import { useElementBounding, useWindowSize } from '@vueuse/core';
 // 接口
 import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto, DeepRequired } from '@/api/interface';
 import {
@@ -343,6 +344,11 @@ import {
 
 // 搜索栏
 const queryRef = ref<FormInstance>();
+// table列表
+const tableRef = ref<TableInstance>();
+// 用于计算table高度
+const { top } = useElementBounding(tableRef as any);
+const { height } = useWindowSize();
 
 const ${tableName}List = ref<DeepRequired<${TableName}Entity[]>>([]);
 
@@ -456,6 +462,8 @@ const handleUpdate = async (row: DeepRequired<${TableName}Entity>) => {
     editForm.value = data.data;
     editDialogVisible.value = true;
 };
+
+const submitLoading = ref(false);
 /** 提交按钮 */
 const submitForm = async () => {
     try {
