@@ -271,7 +271,7 @@ const ${it.name}Group = [${it.enumValues
             <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
         </el-row>
         <!-- ${this.entity.desc} -->
-        <el-table ref="tableRef" v-loading="loading" :data="${tableName}List" :max-height="height - top - 116" @selectionChange="handleSelectionChange">
+        <el-table ref="tableRef" v-loading="loading" :data="${tableName}List" :max-height="tableMaxHeight" @selectionChange="handleSelectionChange">
             <el-table-column type="selection" width="55" align="center" />${tableColunmString}
         
             <el-table-column label="创建时间" align="center" prop="createdAt" width="180">
@@ -328,10 +328,11 @@ const ${it.name}Group = [${it.enumValues
 <script setup name="${TableName}" lang="ts">
 import { dateFormat } from '@zeronejs/utils';
 import { ref } from 'vue';
-import { ElMessage, FormInstance, ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue';
 import { endOfDay } from 'date-fns';
 import { useElementBounding, useWindowSize } from '@vueuse/core';
+import type { FormInstance, TableInstance } from 'element-plus';
 // 接口
 import type { ${TableName}CreateDto, ${TableName}Entity, ${TableName}ListWhereDto, DeepRequired } from '@/api/interface';
 import {
@@ -349,6 +350,7 @@ const tableRef = ref<TableInstance>();
 // 用于计算table高度
 const { top } = useElementBounding(tableRef as any);
 const { height } = useWindowSize();
+const tableMaxHeight = computed(() => Math.floor(height.value - top.value - 116)); // 高度 - 顶部距离 - 分页器116  
 
 const ${tableName}List = ref<DeepRequired<${TableName}Entity[]>>([]);
 
