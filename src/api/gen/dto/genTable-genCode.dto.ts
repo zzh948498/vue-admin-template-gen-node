@@ -21,4 +21,10 @@ export class GenTableGenCodeDto {
     @ApiProperty()
     @IsString()
     template: string;
+    /**
+     * 接口地址
+     */
+    @ApiProperty()
+    @IsString()
+    apiController: string;
 }

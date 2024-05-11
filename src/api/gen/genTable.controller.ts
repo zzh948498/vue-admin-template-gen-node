@@ -108,6 +108,10 @@ export class GenTableController {
     @ApiRPrimitiveOfResponse('number', 'array')
     @Post('/genCode')
     async genCode(@Body() dto: GenTableGenCodeDto) {
+        if(dto.template === 'giime'){
+            const data = await this.genTableService.genGiime(dto);
+            return new RDto({ data: data });
+        }
         const data = await this.genTableService.genCode(dto.ids);
         return new RDto({ data: data });
     }

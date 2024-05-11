@@ -10,14 +10,17 @@ import { writeFile } from 'fs-extra';
 import { GenTableRelationsEntityTypeEnum } from './entities/genTableRelations.entity';
 import { FeRuoYiElementTemp } from './feTemps/ruoyi.element';
 import { FeElementPlusTemp } from './feTemps/element.plus';
+import { FeGiimeTemp } from './feTemps/giime';
 import { FeTempsFactory } from './feTemps/feTempsFactory';
 import { Project } from 'ts-morph';
 
 import { join } from 'path';
+import { GenTableGenCodeDto } from './dto/genTable-genCode.dto';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
     templates: { name: string; tempClass: typeof FeTempsFactory }[] = [
+        { name: 'giime', tempClass: FeElementPlusTemp },
         { name: 'element-plus', tempClass: FeElementPlusTemp },
         { name: 'ruoyi', tempClass: FeRuoYiElementTemp },
     ];
@@ -209,6 +212,35 @@ ${relationsStr}
             const temp = new FeElementPlusTemp(entity);
             const feString = temp.genString();
             zip.file(upperFirst(entity.name).replace(/Entity$/, '') + '.vue', feString);
+        }
+
+        return zip.generateAsync({
+            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+            type: 'array',
+            // 压缩算法
+            compression: 'DEFLATE',
+            compressionOptions: {
+                level: 9,
+            },
+        });
+    }
+    async genGiime(dto: GenTableGenCodeDto) {
+        const entities = await this.genTableRepository.find({
+            where: {
+                id: In(dto.ids),
+            },
+            relations: ['columns', 'relations'],
+        });
+        if (!entities.length) {
+            throw new BadRequestException('未找到相关信息');
+        }
+        const zip = new JSZip();
+        for (let idx = 0; idx < entities.length; idx++) {
+            const entity = entities[idx];
+            const fileList = new FeGiimeTemp(entity, dto).genZipOption();
+            for (const item of fileList) {
+                zip.file(`${lowerFirst(entity.name)}/${item.fileName}`, item.value);
+            }
         }
 
         return zip.generateAsync({

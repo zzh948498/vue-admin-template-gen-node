@@ -14,6 +14,11 @@ export class GenTableListWhereDto {
     @IsOptional()
     desc?: string;
     /**
+     * 路由前缀
+     */
+    @IsOptional()
+    pathPrefix?: string;
+    /**
      * 备注
      */
     @IsOptional()

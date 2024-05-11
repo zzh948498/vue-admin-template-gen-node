@@ -16,6 +16,13 @@ export class GenTableCreateDto {
     })
     desc: string;
     /**
+     * 路由前缀
+     */
+    @IsNotEmpty({
+        message: '路由前缀不能为空',
+    })
+    pathPrefix: string;
+    /**
      * 备注
      */
     @IsOptional()

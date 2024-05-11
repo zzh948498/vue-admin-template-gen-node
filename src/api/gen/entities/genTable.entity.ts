@@ -41,6 +41,11 @@ export class GenTableEntity extends BaseEntity {
     @Column()
     desc: string;
     /**
+     * 路由前缀
+     */
+    @Column({ default: '' })
+    pathPrefix: string;
+    /**
      * 备注
      */
     @Column({ nullable: true })
