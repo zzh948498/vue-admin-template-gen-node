@@ -53,7 +53,7 @@ export class FeGiimeEditDialogTemp extends FeTempsFactory {
         return `<template>
   <!-- 添加/修改对话框 -->
   <gm-dialog v-model="editDialogVisible" :title="isAddDialog ? '添加${this.entity.desc}' : '修改${this.entity.desc}'" width="500px" append-to-body>
-    <EditForm ref="editFormRef" v-model:edit-form="editForm" />
+    <EditForm ref="editFormRef" v-model:editForm="editForm" />
     <template #footer>
       <div class="dialog-footer">
         <gm-button type="primary" :loading="submitLoading" @click="submitForm">确 定</gm-button>

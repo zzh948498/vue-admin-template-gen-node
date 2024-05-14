@@ -59,7 +59,8 @@ export class FeGiimeUseOptionsTemp extends FeTempsFactory {
             .filter(it => this.optionsTypes.includes(it.htmlType))
             .map(it => it.name + 'Options,').join(`
     `);
-        return `export const use${TableName}Options = () => {${optionsString}
+        return `export const use${TableName}Options = () => {
+  const tableId = '${randomUUID()}';${optionsString}
   const rules = {${requiredList
       .map(
           it => `
@@ -68,6 +69,7 @@ export class FeGiimeUseOptionsTemp extends FeTempsFactory {
       .join('')}
   };
   return {
+    tableId,
     rules,
     ${importOptionsString}
   };

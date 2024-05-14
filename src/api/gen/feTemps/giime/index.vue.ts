@@ -29,10 +29,11 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
         return `<template>
   <div class="p-5">
     <!-- 搜索 -->
-    <Search :showSearch="showSearch" @getList="getList" />
+    <Search v-model:queryParams="queryParams" :showSearch="showSearch" @getList="getList" />
     <!-- 工具栏 -->
     <TableToolbar
       v-model:showSearch="showSearch"
+      v-model:queryParams="queryParams"
       :notSelected="notSelected"
       @optionAddForm="editDialogRef?.optionAddForm"
       @batchDelete="handleDelete()"

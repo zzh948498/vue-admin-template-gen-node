@@ -2,7 +2,6 @@ import { ColumnsHTMLType, ColumnsType, GenColumnsEntity } from '../../../entitie
 import { GenTableEntity } from '../../../entities/genTable.entity';
 import { upperFirst, lowerFirst } from 'lodash';
 import { FeTempsFactory } from '../../feTempsFactory';
-import { randomUUID } from 'crypto';
 import { GenTableGenCodeDto } from '@api/gen/dto/genTable-genCode.dto';
 import { parseSwaggerPathTemplateToFnName } from '@zeronejs/cli/src/utils/generateUtil';
 export class FeGiimeTableToolbarTemp extends FeTempsFactory {
@@ -29,20 +28,20 @@ export class FeGiimeTableToolbarTemp extends FeTempsFactory {
         const requiredList = this.requiredList;
         return `<template>
   <div>
-    <gm-row :gutter="10" class="mb-2">
+    <gm-table-toolbar v-model:showSearch="showSearch" v-model:queryParams="queryParams" :tableId="tableId" @getList="emits('getList')">
       <gm-col :span="1.5">
         <gm-button type="primary" plain :icon="Plus" @click="emits('optionAddForm')">新增</gm-button>
       </gm-col>
       <gm-col :span="1.5">
         <gm-button type="danger" plain :icon="Delete" :disabled="notSelected" @click="emits('batchDelete')">删除</gm-button>
       </gm-col>
-
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="emits('getList')" />
-    </gm-row>
+    </gm-table-toolbar>
   </div>
 </template>
 <script lang="ts" setup>
 import { Delete, Plus } from '@element-plus/icons-vue';
+import { use${TableName}Options } from '../composables/use${TableName}Options';
+import type { Post${this.apiPrefix}ListInput } from '${this.dto.apiController}';
 defineProps<{
   notSelected: boolean;
 }>();
@@ -53,6 +52,9 @@ const emits = defineEmits<{
 }>();
 
 const showSearch = defineModel<boolean>('showSearch', { required: true });
+const queryParams = defineModel<Post${this.apiPrefix}ListInput>('queryParams', { required: true });
+
+const { tableId } = use${TableName}Options();
 </script>
 `;
     }

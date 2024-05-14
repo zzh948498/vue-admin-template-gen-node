@@ -75,13 +75,7 @@ export class FeGiimeTableTemp extends FeTempsFactory {
             .join(', ');
         return `<template>
   <div>
-    <gm-table-pro
-      :data="listData"
-      page="${randomUUID()}"
-      :selection="true"
-      :max-height="tableMaxHeight"
-      @selectionChange="emit('selectionChange', $event)"
-    >${tableColunmString}
+    <gm-table-pro :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
       <gm-table-column-pro prop="" type="edit">
         <template #default="{ row }">
           <gm-operate-button label="编辑" prop="edit" type="primary" @click="emit('openUpdateForm', row)" />
@@ -111,7 +105,7 @@ const tableRef = ref<TableInstance>();
 const { top } = useElementBounding(tableRef as any);
 const { height } = useWindowSize();
 const tableMaxHeight = computed(() => Math.floor(height.value - top.value - 116)); // 高度 - 顶部距离 - 分页器116
-const { ${importOptionsString} } = use${TableName}Options();
+const { tableId, ${importOptionsString} } = use${TableName}Options();
 </script>
 `;
     }

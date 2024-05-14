@@ -73,14 +73,7 @@ const emits = defineEmits<{
 }>();
 const { ${importOptionsString} } = use${TableName}Options();
 // 列表请求参数
-const queryParams = ref<Post${this.apiPrefix}ListInput>({
-  name: undefined,
-  platform: undefined,
-  /** 当前页 */
-  current: 1,
-  /** 每页显示条数 */
-  size: 10,
-});
+const queryParams = defineModel<Post${this.apiPrefix}ListInput>('queryParams', { required: true });
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.current = 1;
