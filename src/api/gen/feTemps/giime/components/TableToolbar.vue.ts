@@ -27,7 +27,7 @@ export class FeGiimeTableToolbarTemp extends FeTempsFactory {
         const queryList = this.queryList;
         const requiredList = this.requiredList;
         return `<template>
-  <div>
+  <div class="mb-3">
     <gm-table-toolbar v-model:showSearch="showSearch" v-model:queryParams="queryParams" :tableId="tableId" @getList="emits('getList')">
       <gm-col :span="1.5">
         <gm-button type="primary" plain :icon="Plus" @click="emits('optionAddForm')">新增</gm-button>

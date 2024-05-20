@@ -75,7 +75,7 @@ export class FeGiimeTableTemp extends FeTempsFactory {
             .join(', ');
         return `<template>
   <div>
-    <gm-table-pro :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
+    <gm-table-pro ref="tableRef" :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
       <gm-table-column-pro prop="" type="edit">
         <template #default="{ row }">
           <gm-operate-button label="编辑" prop="edit" type="primary" @click="emit('openUpdateForm', row)" />

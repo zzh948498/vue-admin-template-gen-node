@@ -19,13 +19,36 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
         this.requiredList = this.entity.columns.filter(it => it.required);
         this.tableList = this.entity.columns.filter(it => it.isList);
     }
-
+    genQueryParams() {
+        const queryList = this.queryList;
+        return `${queryList
+            .map(it => {
+                switch (it.tsType) {
+                    case ColumnsType.Date:
+                        return `
+  ${it.name}: [],`;
+                    case ColumnsType.boolean:
+                        return `
+  ${it.name}: false,`;
+                    case ColumnsType.number:
+                        return `
+  ${it.name}: 0,`;
+                    case ColumnsType.string:
+                        return `
+  ${it.name}: undefined,`;
+                    default:
+                        return '';
+                }
+            })
+            .join('')}`;
+    }
     genString() {
         // 表名
         const tableName = lowerFirst(this.entity.name.replace(/Entity$/, ''));
         const TableName = upperFirst(tableName);
         const queryList = this.queryList;
         const requiredList = this.requiredList;
+        const queryParamsStr = this.genQueryParams();
         return `<template>
   <div class="p-5">
     <!-- 搜索 -->
@@ -75,9 +98,7 @@ const notSelected = ref(true);
 
 const total = ref(0);
 // 列表请求参数
-const queryParams = ref<Post${this.apiPrefix}ListInput>({
-  name: undefined,
-  platform: undefined,
+const queryParams = ref<Post${this.apiPrefix}ListInput>({${queryParamsStr}
   /** 当前页 */
   current: 1,
   /** 每页显示条数 */
