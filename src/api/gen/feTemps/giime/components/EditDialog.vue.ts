@@ -3,7 +3,7 @@ import { GenTableEntity } from '../../../entities/genTable.entity';
 import { upperFirst, lowerFirst } from 'lodash';
 import { FeTempsFactory } from '../../feTempsFactory';
 import { GenTableGenCodeDto } from '@api/gen/dto/genTable-genCode.dto';
-import { parseSwaggerPathTemplateToFnName } from "@zeronejs/cli/src/utils/generateUtil";
+import { parseSwaggerPathTemplateToFnName } from '@zeronejs/cli/src/utils/generateUtil';
 export class FeGiimeEditDialogTemp extends FeTempsFactory {
     entity: GenTableEntity;
     // 搜索列表
@@ -53,7 +53,7 @@ export class FeGiimeEditDialogTemp extends FeTempsFactory {
         return `<template>
   <!-- 添加/修改对话框 -->
   <gm-dialog v-model="editDialogVisible" :title="isAddDialog ? '添加${this.entity.desc}' : '修改${this.entity.desc}'" width="500px" append-to-body>
-    <EditForm ref="editFormRef" v-model:editForm="editForm" />
+    <EditForm ref="editFormRef" v-model:editForm="editForm" @getList="emit('getList')" />
     <template #footer>
       <div class="dialog-footer">
         <gm-button type="primary" :loading="submitLoading" @click="submitForm">确 定</gm-button>
@@ -66,6 +66,10 @@ export class FeGiimeEditDialogTemp extends FeTempsFactory {
 import EditForm from './EditForm.vue';
 import type { Post${this.apiPrefix}AddInput, Post${this.apiPrefix}ListResultDataRecords } from '${this.dto.apiController}';
 import { post${this.apiPrefix}Add, post${this.apiPrefix}Edit } from '${this.dto.apiController}';
+
+const emit = defineEmits<{
+  (e: 'getList'): Promise<any>;
+}>();
 
 /**
  * 编辑表单
@@ -118,17 +122,21 @@ const submitForm = async () => {
   }
   submitLoading.value = true;
   try {
+    let res: { data: { code: number } };
     if (!fromId.value) {
       // 新增
-      await post${this.apiPrefix}Add(editForm.value);
+      res = await post${this.apiPrefix}Add(editForm.value);
     } else {
       // 修改
-      await post${this.apiPrefix}Edit({ ...editForm.value, id: fromId.value });
+      res = await post${this.apiPrefix}Edit({ ...editForm.value, id: fromId.value });
     }
     submitLoading.value = false;
+    if (res.data.code !== 200) {
+      return;
+    }
     GmMessage.success('操作成功');
     editDialogVisible.value = false;
-    // getList();
+    emit('getList')
   } catch (e) {
     submitLoading.value = false;
     console.error(e);

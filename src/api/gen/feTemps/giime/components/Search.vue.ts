@@ -68,7 +68,7 @@ import type { Post${this.apiPrefix}ListInput } from '${this.dto.apiController}';
 defineProps<{
   showSearch: boolean;
 }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'getList'): Promise<any>;
 }>();
 const { ${importOptionsString} } = use${TableName}Options();
@@ -77,7 +77,7 @@ const queryParams = defineModel<Post${this.apiPrefix}ListInput>('queryParams', {
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.current = 1;
-  emits('getList');
+  emit('getList');
 };
 /** 重置按钮操作 */
 const resetQuery = () => {

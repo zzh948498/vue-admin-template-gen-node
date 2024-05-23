@@ -28,12 +28,12 @@ export class FeGiimeTableToolbarTemp extends FeTempsFactory {
         const requiredList = this.requiredList;
         return `<template>
   <div class="mb-3">
-    <gm-table-toolbar v-model:showSearch="showSearch" v-model:queryParams="queryParams" :tableId="tableId" @getList="emits('getList')">
+    <gm-table-toolbar v-model:showSearch="showSearch" v-model:queryParams="queryParams" :tableId="tableId" @getList="emit('getList')">
       <gm-col :span="1.5">
-        <gm-button type="primary" plain :icon="Plus" @click="emits('optionAddForm')">新增</gm-button>
+        <gm-button type="primary" plain :icon="Plus" @click="emit('optionAddForm')">新增</gm-button>
       </gm-col>
       <gm-col :span="1.5">
-        <gm-button type="danger" plain :icon="Delete" :disabled="notSelected" @click="emits('batchDelete')">删除</gm-button>
+        <gm-button type="danger" plain :icon="Delete" :disabled="notSelected" @click="emit('batchDelete')">删除</gm-button>
       </gm-col>
     </gm-table-toolbar>
   </div>
@@ -45,7 +45,7 @@ import type { Post${this.apiPrefix}ListInput } from '${this.dto.apiController}';
 defineProps<{
   notSelected: boolean;
 }>();
-const emits = defineEmits<{
+const emit = defineEmits<{
   (e: 'optionAddForm'): void;
   (e: 'batchDelete'): void;
   (e: 'getList'): Promise<any>;
