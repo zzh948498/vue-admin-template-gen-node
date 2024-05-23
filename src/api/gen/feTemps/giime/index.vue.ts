@@ -127,29 +127,15 @@ const handleSelectionChange: (value: any[]) => any = (selection: Post${this.apiP
 /** 删除按钮操作 */
 const handleDelete = async (row?: Post${this.apiPrefix}ListResultDataRecords) => {
   const selectIds = row ? [row.id] : selectedIds.value;
-  try {
-    await GmMessageBox.confirm(\`是否确认删除编号为"\${selectIds.join(',')}"的数据项？\`, '系统提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-      beforeClose: async (action, instance, done) => {
-        if (action === 'confirm') {
-          instance.confirmButtonLoading = true;
-          const { data } = await post${this.apiPrefix}Delete({ id: selectIds.join(',') });
-          done();
-          if (data.code !== 200) {
-            return;
-          }
-          getList();
-          GmMessage.success('删除成功');
-        } else {
-          done();
-        }
-      },
-    });
-  } catch (e) {
-    return console.error(e);
-  }
+  GmConfirmBox({ message: \`是否确认删除编号为"\${selectIds.join(',')}"的数据项？\` }, async () => {
+    const { data } = await post${this.apiPrefix}Delete({ id: selectIds.join(',') });
+    if (data.code !== 200) {
+      return;
+    }
+    GmMessage.success('删除成功');
+    getList();
+  });
+ 
 };
 </script>
 `;
