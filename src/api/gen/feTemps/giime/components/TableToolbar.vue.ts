@@ -30,7 +30,7 @@ export class FeGiimeTableToolbarTemp extends FeTempsFactory {
   <div class="mb-3">
     <gm-table-toolbar v-model:showSearch="showSearch" v-model:queryParams="queryParams" :tableId="tableId" @getList="emit('getList')">
       <gm-col :span="1.5">
-        <gm-button type="primary" plain :icon="Plus" @click="emit('optionAddForm')">新增</gm-button>
+        <gm-button type="primary" plain :icon="Plus" @click="emit('openAddForm')">新增</gm-button>
       </gm-col>
       <gm-col :span="1.5">
         <gm-button type="danger" plain :icon="Delete" :disabled="notSelected" @click="emit('batchDelete')">删除</gm-button>
@@ -46,7 +46,7 @@ defineProps<{
   notSelected: boolean;
 }>();
 const emit = defineEmits<{
-  (e: 'optionAddForm'): void;
+  (e: 'openAddForm'): void;
   (e: 'batchDelete'): void;
   (e: 'getList'): Promise<any>;
 }>();

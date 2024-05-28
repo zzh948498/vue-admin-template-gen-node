@@ -63,6 +63,8 @@ export class FeGiimeEditDialogTemp extends FeTempsFactory {
   </gm-dialog>
 </template>
 <script lang="ts" setup>
+import { cloneDeep } from 'lodash-es';
+import { resetObject } from 'giime';
 import EditForm from './EditForm.vue';
 import type { Post${this.apiPrefix}AddInput, Post${this.apiPrefix}ListResultDataRecords } from '${this.dto.apiController}';
 import { post${this.apiPrefix}Add, post${this.apiPrefix}Edit } from '${this.dto.apiController}';
@@ -78,11 +80,12 @@ const editDialogVisible = ref(false);
 const isAddDialog = ref(true);
 const editFormRef = ref<InstanceType<typeof EditForm>>();
 const fromId = ref(0);
+const defaultEditForm: PostBasicV1ConditionAddInput = {${formColumnsString}
+};
+const editForm = ref(cloneDeep(defaultEditForm));
 
-const editForm = ref<Post${this.apiPrefix}AddInput>({${formColumnsString}
-});
 /** 新增按钮操作 */
-const optionAddForm = () => {
+const openAddForm = () => {
   editDialogVisible.value = true;
   isAddDialog.value = true;
 };
@@ -97,8 +100,7 @@ function reset() {
   // 表单加载可能有延迟   会导致重置失败
   // editFormRef.value?.resetFields?.();
   // 手动重置
-  editForm.value = {${resetFormColumnsString}
-  };
+  editForm.value = cloneDeep(defaultEditForm);
 }
 
 /** 修改按钮操作 */
@@ -108,7 +110,7 @@ const openUpdateForm = (row: Post${this.apiPrefix}ListResultDataRecords) => {
   // 如果需要从接口获取详情
   // const { data } = await getItemById({ id: selectId });
   fromId.value = row.id;
-  editForm.value = { ...row };
+  resetObject(editForm.value, row);
   editDialogVisible.value = true;
 };
 
@@ -136,14 +138,14 @@ const submitForm = async () => {
     }
     GmMessage.success('操作成功');
     editDialogVisible.value = false;
-    emit('getList')
+    emit('getList');
   } catch (e) {
     submitLoading.value = false;
     console.error(e);
   }
 };
 defineExpose({
-  optionAddForm,
+  openAddForm,
   openUpdateForm,
 });
 </script>

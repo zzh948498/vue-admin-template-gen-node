@@ -58,7 +58,7 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
       v-model:showSearch="showSearch"
       v-model:queryParams="queryParams"
       :notSelected="notSelected"
-      @optionAddForm="editDialogRef?.optionAddForm"
+      @openAddForm="editDialogRef?.openAddForm"
       @batchDelete="handleDelete()"
       @getList="getList"
     />
@@ -73,7 +73,7 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
     <!-- 分页 -->
     <Pagination v-show="total > 0" v-model:page="queryParams.current" v-model:limit="queryParams.size" :total="total" @pagination="getList" />
     <!-- 编辑弹窗 -->
-    <EditDialog ref="editDialogRef" @getList="emit('getList')" />
+    <EditDialog ref="editDialogRef" @getList="getList" />
   </div>
 </template>
 

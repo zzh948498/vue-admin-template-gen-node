@@ -74,8 +74,8 @@ export class FeGiimeTableTemp extends FeTempsFactory {
             .map(it => it.name + 'Options')
             .join(', ');
         return `<template>
-  <div>
-    <gm-table-pro ref="tableRef" :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
+  <div ref="tableDivRef">
+    <gm-table-pro :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
       <gm-table-column-pro prop="" type="edit">
         <template #default="{ row }">
           <gm-operate-button label="编辑" prop="edit" type="primary" @click="emit('openUpdateForm', row)" />
@@ -100,9 +100,9 @@ const emit = defineEmits<{
   (e: 'handleDelete', row: Post${this.apiPrefix}ListResultDataRecords): any;
 }>();
 // table列表
-const tableRef = ref<TableInstance>();
+const tableDivRef = ref<HTMLDivElement>();
 // 用于计算table高度
-const { top } = useElementBounding(tableRef as any);
+const { top } = useElementBounding(tableDivRef);
 const { height } = useWindowSize();
 const tableMaxHeight = computed(() => Math.floor(height.value - top.value - 116)); // 高度 - 顶部距离 - 分页器116
 const { tableId, ${importOptionsString} } = use${TableName}Options();

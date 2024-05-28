@@ -82,13 +82,16 @@ export class FeGiimeEditFormTemp extends FeTempsFactory {
         const requiredList = this.requiredList;
         // 添加表单
         const addFormString = this.genFormStringFactory();
-        const importOptionsString = this.entity.columns
+        let importOptionsString = this.entity.columns
             .filter(it => this.optionsTypes.includes(it.htmlType))
             .map(it => it.name + 'Options')
             .join(', ');
+            if(importOptionsString){
+              importOptionsString += ', '
+            }
         return `<template>
   <div>
-    <gm-form ref="editFormRef" :model="editForm" :rules="rules">${addFormString}
+    <gm-form ref="editFormRef" :model="editForm" :rules="rules" label-width="auto">${addFormString}
     </gm-form>
   </div>
 </template>
@@ -100,7 +103,7 @@ import type { Post${this.apiPrefix}AddInput } from '${this.dto.apiController}';
 const editForm = defineModel<Post${this.apiPrefix}AddInput>('editForm', { required: true });
 const editFormRef = ref<FormInstance>();
 
-const { ${importOptionsString}, rules } = use${TableName}Options();
+const { ${importOptionsString}rules } = use${TableName}Options();
 
 const resetFields = () => {
   return editFormRef.value?.resetFields();
