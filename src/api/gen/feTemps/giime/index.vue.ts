@@ -50,7 +50,8 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
         const requiredList = this.requiredList;
         const queryParamsStr = this.genQueryParams();
         return `<template>
-  <div class="p-5">
+  <gm-table-ctx :tableId="tableId" class="p-5">
+    <h1 class="mb-6 font-bold">你的标题</h1>
     <!-- 搜索 -->
     <Search v-model:queryParams="queryParams" :showSearch="showSearch" @getList="getList" />
     <!-- 工具栏 -->
@@ -58,6 +59,9 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
       v-model:showSearch="showSearch"
       v-model:queryParams="queryParams"
       :notSelected="notSelected"
+      :total="total"
+      :selectedIds="selectedIds"
+      class="mb-3"
       @openAddForm="editDialogRef?.openAddForm"
       @batchDelete="handleDelete()"
       @getList="getList"
@@ -71,10 +75,10 @@ export class FeGiimeIndexTemp extends FeTempsFactory {
       @openUpdateForm="editDialogRef?.openUpdateForm"
     />
     <!-- 分页 -->
-    <Pagination v-show="total > 0" v-model:page="queryParams.current" v-model:limit="queryParams.size" :total="total" @pagination="getList" />
+    <gm-table-pagination v-model:page="queryParams.current" v-model:limit="queryParams.size" :total="total" @pagination="getList" />
     <!-- 编辑弹窗 -->
     <EditDialog ref="editDialogRef" @getList="getList" />
-  </div>
+  </gm-table-ctx>
 </template>
 
 <script setup lang="ts">
@@ -82,11 +86,14 @@ import EditDialog from './components/EditDialog.vue';
 import Search from './components/Search.vue';
 import Table from './components/Table.vue';
 import TableToolbar from './components/TableToolbar.vue';
+import { use${TableName}Options } from './composables/use${TableName}Options';
 
 // 接口
 import type { Post${this.apiPrefix}ListInput, Post${this.apiPrefix}ListResultDataRecords } from '${this.dto.apiController}';
 import { post${this.apiPrefix}Delete, usePost${this.apiPrefix}List } from '${this.dto.apiController}';
+
 const editDialogRef = ref<InstanceType<typeof EditDialog>>();
+const { tableId } = use${TableName}Options();
 
 // 打开搜索模块
 const showSearch = ref(true);

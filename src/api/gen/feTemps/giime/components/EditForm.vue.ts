@@ -53,14 +53,14 @@ export class FeGiimeEditFormTemp extends FeTempsFactory {
                         return `
       <gm-form-item ${showStr}label="${it.desc}" prop="${it.name}">
         <gm-radio-group v-model="editForm.${it.name}"${disabledStr}>
-          <gm-radio v-for="it in ${it.name}Options" :key="it.label" :label="it.value">{{ it.label }}</gm-radio>
+          <gm-radio v-for="it in ${it.name}Options" :key="it.label" :value="it.value">{{ it.label }}</gm-radio>
         </gm-radio-group>
       </gm-form-item>`;
                     case ColumnsHTMLType.checkbox:
                         return `
       <gm-form-item ${showStr}label="${it.desc}" prop="${it.name}">
         <gm-checkbox-group v-model="editForm.${it.name}"${disabledStr}>
-          <gm-checkbox v-for="it in ${it.name}Options" :key="it.label" :label="it.value">{{ it.label }}</gm-checkbox>
+          <gm-checkbox v-for="it in ${it.name}Options" :key="it.label" :value="it.value">{{ it.label }}</gm-checkbox>
         </gm-checkbox-group>
       </gm-form-item>`;
                     case ColumnsHTMLType.datetime:

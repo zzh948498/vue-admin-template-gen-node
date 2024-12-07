@@ -28,11 +28,11 @@ export class FeGiimeTableTemp extends FeTempsFactory {
                     case ColumnsHTMLType.input:
                     case ColumnsHTMLType.textarea:
                         return `
-      <gm-table-column-pro label="${it.desc}" align="center" prop="${it.name}" show-overflow-tooltip />`;
+      <gm-table-column-pro label="${it.desc}" align="left" prop="${it.name}" show-overflow-tooltip width="120" />`;
                     case ColumnsHTMLType.select:
                     case ColumnsHTMLType.radio:
                         return `
-      <gm-table-column-pro label="${it.desc}" align="center" prop="${it.name}">
+      <gm-table-column-pro label="${it.desc}" align="left" prop="${it.name}" width="120">
         <template #default="scope">
           <template v-for="item in ${it.name}Options">
             <template v-if="scope.row.${it.name} === item.value">
@@ -43,14 +43,14 @@ export class FeGiimeTableTemp extends FeTempsFactory {
       </gm-table-column-pro>`;
                     case ColumnsHTMLType.checkbox:
                         return `
-      <gm-table-column-pro label="${it.desc}" align="center" prop="${it.name}">
+      <gm-table-column-pro label="${it.desc}" align="left" prop="${it.name}" width="120">
         <template #default="scope">
           <gm-tag v-for="item in scope.row.${it.name}" :key="item" class="ml-2">{{ item }}</gm-tag>
         </template>
       </gm-table-column-pro>`;
                     case ColumnsHTMLType.datetime:
                         return `
-      <gm-table-column-pro label="${it.desc}" align="center" prop="${it.name}" width="180">
+      <gm-table-column-pro label="${it.desc}" align="left" prop="${it.name}" width="180">
         <template #default="scope">
           <span>{{ scope.row.${it.name} }}</span>
         </template>
@@ -74,8 +74,8 @@ export class FeGiimeTableTemp extends FeTempsFactory {
             .map(it => it.name + 'Options')
             .join(', ');
         return `<template>
-  <div ref="tableDivRef">
-    <gm-table-pro :data="listData" :page="tableId" :selection="true" :max-height="tableMaxHeight" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
+  <div>
+    <gm-table-pro :data="listData" :page="tableId" :selection="true" @selectionChange="emit('selectionChange', $event)">${tableColunmString}
       <gm-table-column-pro prop="" type="edit">
         <template #default="{ row }">
           <gm-operate-button label="编辑" prop="edit" type="primary" @click="emit('openUpdateForm', row)" />
@@ -86,7 +86,6 @@ export class FeGiimeTableTemp extends FeTempsFactory {
   </div>
 </template>
 <script setup lang="ts">
-import { useElementBounding, useWindowSize } from '@vueuse/core';
 import { use${TableName}Options } from '../composables/use${TableName}Options';
 import type { TableInstance } from 'giime';
 import type { Post${this.apiPrefix}ListResultDataRecords } from '${this.dto.apiController}';
@@ -99,12 +98,7 @@ const emit = defineEmits<{
   (e: 'openUpdateForm', row: Post${this.apiPrefix}ListResultDataRecords): any;
   (e: 'handleDelete', row: Post${this.apiPrefix}ListResultDataRecords): any;
 }>();
-// table列表
-const tableDivRef = ref<HTMLDivElement>();
-// 用于计算table高度
-const { top } = useElementBounding(tableDivRef);
-const { height } = useWindowSize();
-const tableMaxHeight = computed(() => Math.floor(height.value - top.value - 116)); // 高度 - 顶部距离 - 分页器116
+
 const { tableId, ${importOptionsString} } = use${TableName}Options();
 </script>
 `;

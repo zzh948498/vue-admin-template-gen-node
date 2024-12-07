@@ -1,12 +1,12 @@
 import { AppService } from './app.service';
-import { BadRequestException, Body, Controller, Get, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { IsOptional, IsString } from 'class-validator';
 import { ApiROfResponse } from '@common/ApiROfResponse';
 import { ApiExtraModels, ApiOperation } from '@nestjs/swagger';
 import axios from 'axios';
 import { RDto } from '@common/Result.dto';
 import { Column } from 'typeorm';
-import { AppReadJsonRes, AppReadJsonWhereDto } from './app.dto';
+import { AppApifoxWhereDto, AppReadJsonRes, AppReadJsonWhereDto } from './app.dto';
 
 @ApiExtraModels(AppReadJsonRes)
 @Controller()
@@ -31,5 +31,9 @@ export class AppController {
             throw new BadRequestException('json链接读取失败 ！！！');
         }
         return new RDto({ data: { json: data } });
+    }
+    @Get('/apifox')
+    apifox(@Query() dto: AppApifoxWhereDto) {
+        return this.appService.apifox(dto);
     }
 }

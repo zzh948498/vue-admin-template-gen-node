@@ -52,7 +52,7 @@ export class FeGiimeEditDialogTemp extends FeTempsFactory {
 
         return `<template>
   <!-- 添加/修改对话框 -->
-  <gm-dialog v-model="editDialogVisible" :title="isAddDialog ? '添加${this.entity.desc}' : '修改${this.entity.desc}'" width="500px" append-to-body>
+  <gm-dialog v-model="editDialogVisible" :title="isAddDialog ? '添加${this.entity.desc}' : '修改${this.entity.desc}'" width="500px" append-to-body @closed="cancel">
     <EditForm ref="editFormRef" v-model:editForm="editForm" @getList="emit('getList')" />
     <template #footer>
       <div class="dialog-footer">
@@ -80,7 +80,7 @@ const editDialogVisible = ref(false);
 const isAddDialog = ref(true);
 const editFormRef = ref<InstanceType<typeof EditForm>>();
 const fromId = ref(0);
-const defaultEditForm: PostBasicV1ConditionAddInput = {${formColumnsString}
+const defaultEditForm: Post${this.apiPrefix}AddInput = {${formColumnsString}
 };
 const editForm = ref(cloneDeep(defaultEditForm));
 

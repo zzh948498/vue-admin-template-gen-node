@@ -11,10 +11,14 @@ import { GenTableRelationsEntity } from './entities/genTableRelations.entity';
 import { GenTableRelationsController } from './genTableRelations.controller';
 import { GenTableRelationsService } from './genTableRelations.service';
 
+/**AI编程 */
+import { GenAIController } from './genAI.controller';
+import { GenAIService } from './genAI.service';
+
 @Module({
     imports: [TypeOrmModule.forFeature([GenColumnsEntity, GenTableEntity, GenTableRelationsEntity])],
-    controllers: [GenColumnsController, GenTableController, GenTableRelationsController],
-    providers: [GenColumnsService, GenTableService, GenTableRelationsService],
-    exports: [GenColumnsService, GenTableService, GenTableRelationsService],
+    controllers: [GenColumnsController, GenTableController, GenTableRelationsController, GenAIController],
+    providers: [GenColumnsService, GenTableService, GenTableRelationsService, GenAIService],
+    exports: [GenColumnsService, GenTableService, GenTableRelationsService, GenAIService],
 })
 export class GenModule {}
