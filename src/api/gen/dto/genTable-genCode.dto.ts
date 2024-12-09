@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsString, IsBoolean, IsOptional } from 'class-validator';
 
 export class GenTableGenCodeDto {
     /**
@@ -27,4 +27,29 @@ export class GenTableGenCodeDto {
     @ApiProperty()
     @IsString()
     apiController: string;
+    /**
+     * 是否有 产品需求文档
+     */
+    @ApiProperty()
+    @IsOptional()
+    @IsBoolean()
+    hasPRD?: boolean;
+}
+
+export class GenTableGenCodeResultDto {
+    /**
+     * name
+     */
+    @ApiProperty()
+    fileName: string;
+    /**
+     * type
+     */
+    @ApiProperty()
+    type: string;
+    /**
+     * tsType
+     */
+    @ApiProperty()
+    value: number[];
 }

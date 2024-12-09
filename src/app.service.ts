@@ -28,7 +28,7 @@ export class AppService {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Apifox-Version': '2024-01-20',
-                        Authorization: `Bearer ${dto.access_token ?? 'APS-mifJPXh1MyCvPj1VWLMbLvGL4V8S1NIx'}`,
+                        Authorization: `Bearer ${dto.access_token ?? ''}`,
                     },
                 }
             )

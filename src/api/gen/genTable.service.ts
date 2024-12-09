@@ -16,11 +16,13 @@ import { Project } from 'ts-morph';
 
 import { join } from 'path';
 import { GenTableGenCodeDto } from './dto/genTable-genCode.dto';
+import { FeAiMdTemp } from './feTemps/ai.md';
 @Injectable()
 export class GenTableService {
     constructor(@InjectRepository(GenTableEntity) private genTableRepository: Repository<GenTableEntity>) {}
     templates: { name: string; tempClass: typeof FeTempsFactory }[] = [
         { name: 'giime', tempClass: FeElementPlusTemp },
+        { name: 'ai', tempClass: FeElementPlusTemp },
         { name: 'element-plus', tempClass: FeElementPlusTemp },
         { name: 'ruoyi', tempClass: FeRuoYiElementTemp },
     ];
@@ -53,7 +55,16 @@ export class GenTableService {
     async findById(id: number) {
         const entity = await this.genTableRepository.findOne({
             where: { id },
-            relations: ['columns', 'relations'],
+            relations: {
+                columns: true,
+                relations: true,
+            },
+            // relationLoadStrategy: 'query',
+            order: {
+                columns: {
+                    createdAt: 'DESC',
+                },
+            },
         });
 
         if (!entity) throw new BadRequestException('数据不存在');
@@ -66,12 +77,22 @@ export class GenTableService {
     async delete(id: number | number[]) {
         return this.genTableRepository.delete(id);
     }
-    async genCode(ids: number[]) {
+    async genCode(dto: GenTableGenCodeDto) {
+        const ids = dto.ids;
         const entities = await this.genTableRepository.find({
             where: {
                 id: In(ids),
             },
-            relations: ['columns', 'relations'],
+            relations: {
+                columns: true,
+                relations: true,
+            },
+            // relationLoadStrategy: 'query',
+            order: {
+                columns: {
+                    createdAt: 'DESC',
+                },
+            },
         });
         if (!entities.length) {
             throw new BadRequestException('未找到相关信息');
@@ -214,22 +235,85 @@ ${relationsStr}
             zip.file(upperFirst(entity.name).replace(/Entity$/, '') + '.vue', feString);
         }
 
-        return zip.generateAsync({
-            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
-            type: 'array',
-            // 压缩算法
-            compression: 'DEFLATE',
-            compressionOptions: {
-                level: 9,
+        return {
+            fileName: 'ruoyi.zip',
+            type: 'application/zip',
+            value: await zip.generateAsync({
+                // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+                type: 'array',
+                // 压缩算法
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 9,
+                },
+            }),
+        };
+    }
+    async genAiMd(dto: GenTableGenCodeDto) {
+        const entities = await this.genTableRepository.find({
+            where: {
+                id: In(dto.ids),
+            },
+            relations: {
+                columns: true,
+                relations: true,
+            },
+            // relationLoadStrategy: 'query',
+            order: {
+                columns: {
+                    createdAt: 'DESC',
+                },
             },
         });
+        if (!entities.length) {
+            throw new BadRequestException('未找到相关信息');
+        }
+        const firstFileList = new FeAiMdTemp(entities[0], dto).genZipOption();
+        if (entities.length === 1 && firstFileList.length === 1) {
+            return {
+                fileName: 'ai.md',
+                type: 'text/markdown',
+                value: Array.from(Buffer.from(firstFileList[0].value)),
+            };
+        }
+        const zip = new JSZip();
+        for (let idx = 0; idx < entities.length; idx++) {
+            const entity = entities[idx];
+            const fileList = new FeAiMdTemp(entity, dto).genZipOption();
+            for (const item of fileList) {
+                zip.file(`${lowerFirst(entity.name)}/${item.fileName}`, item.value);
+            }
+        }
+
+        return {
+            fileName: 'ai.zip',
+            type: 'application/zip',
+            value: await zip.generateAsync({
+                // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+                type: 'array',
+                // 压缩算法
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 9,
+                },
+            }),
+        };
     }
     async genGiime(dto: GenTableGenCodeDto) {
         const entities = await this.genTableRepository.find({
             where: {
                 id: In(dto.ids),
             },
-            relations: ['columns', 'relations'],
+            relations: {
+                columns: true,
+                relations: true,
+            },
+            // relationLoadStrategy: 'query',
+            order: {
+                columns: {
+                    createdAt: 'DESC',
+                },
+            },
         });
         if (!entities.length) {
             throw new BadRequestException('未找到相关信息');
@@ -243,15 +327,19 @@ ${relationsStr}
             }
         }
 
-        return zip.generateAsync({
-            // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
-            type: 'array',
-            // 压缩算法
-            compression: 'DEFLATE',
-            compressionOptions: {
-                level: 9,
-            },
-        });
+        return {
+            fileName: 'giime.zip',
+            type: 'application/zip',
+            value: await zip.generateAsync({
+                // 压缩类型选择nodebuffer，在回调函数中会返回zip压缩包的Buffer的值，再利用fs保存至本地
+                type: 'array',
+                // 压缩算法
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 9,
+                },
+            }),
+        };
     }
     async importInterface(interfaceText: string) {
         const project = new Project();

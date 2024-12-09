@@ -7,12 +7,12 @@ import { RDto, RListDto } from '@common/Result.dto';
 import { ApiROfResponse, ApiRPrimitiveOfResponse } from '@common/ApiROfResponse';
 import { BodyIdsDto } from '@common/BodyIds.dto';
 import { Limit } from '@common/utils/constants';
-import { GenTableGenCodeDto } from './dto/genTable-genCode.dto';
+import { GenTableGenCodeDto, GenTableGenCodeResultDto } from './dto/genTable-genCode.dto';
 import { GenTableImportInterfaceDto } from './dto/genTable-importInterface.dto';
 import { GenTableImportInterfaceResultDto } from './dto/genTable-importInterface-result.dto';
 @ApiTags('genTable')
 @ApiBearerAuth()
-@ApiExtraModels(GenTableEntity, GenTableImportInterfaceResultDto)
+@ApiExtraModels(GenTableEntity, GenTableImportInterfaceResultDto, GenTableGenCodeResultDto)
 @ApiHeader({
     name: 'Authorization',
     description: 'Custom token',
@@ -105,21 +105,24 @@ export class GenTableController {
      * 生成代码
      */
     @ApiOperation({ summary: '生成代码' })
-    @ApiRPrimitiveOfResponse('number', 'array')
+    @ApiROfResponse(GenTableGenCodeResultDto, 'object')
     @Post('/genCode')
     async genCode(@Body() dto: GenTableGenCodeDto) {
-        if(dto.template === 'giime'){
-            const data = await this.genTableService.genGiime(dto);
-            return new RDto({ data: data });
-        }
-        const data = await this.genTableService.genCode(dto.ids);
+        const templateServer = [
+            { template: 'giime', handle: (dto: GenTableGenCodeDto) => this.genTableService.genGiime(dto) },
+            { template: 'ai', handle: (dto: GenTableGenCodeDto) => this.genTableService.genAiMd(dto) },
+        ];
+        const handler =
+            templateServer.find(it => it.template === dto.template)?.handle ??
+            ((dto: GenTableGenCodeDto) => this.genTableService.genCode(dto));
+        const data = await handler(dto);
         return new RDto({ data: data });
     }
     /**
      * 导入interface
      */
     @ApiOperation({ summary: '导入interface' })
-    @ApiROfResponse(GenTableImportInterfaceResultDto,'array')
+    @ApiROfResponse(GenTableImportInterfaceResultDto, 'array')
     @Post('/importInterface')
     async importInterface(@Body() dto: GenTableImportInterfaceDto) {
         const data = await this.genTableService.importInterface(dto.interface);

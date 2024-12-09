@@ -1,4 +1,3 @@
-
 ## 重要说明
 
 开发的第一步是找到`@/api/xxx/controller`定义的`axios实例调用`的请求方法，仔细阅读所有列出的请求方法的文件，并且向我请求阅读这些所有请求方法文件内容，并根据请求方法ts文件内实际使用的 所有输入输出interface进行编码，如果有一个没找到就不开发了，直接抛错。
@@ -16,14 +15,17 @@ export function postBasicV1VoltageDownloadTplDemo(input?: PostBasicV1VoltageDown
 
 请严格按照下面的说明编码
 
-1. 请求实例统一在 @/api/open/controller 导出了 只能使用`@/api/open/controller` 这样的导入方式，不能使用 类似这样的完整导入`@/api/open/controller/xxx/xxx`
-2. 输入输出的interface，有的在接口文件导出了，有的在 @/api/open/interface 导出了 直接使用即可，使用方式类似`@/api/open/controller`
+1. 请求实例统一在 `接口导入地址` 导出了,例如： @/api/xxx/controller 只能使用`@/api/xxx/controller` 这样的导入方式。不能使用 类似这样的完整导入`@/api/xxx/controller/xxx/xxx`
+2. 输入输出的interface，有的在接口文件导出了，有的在 @/api/xxx/interface 导出了 直接使用即可，使用方式类似`@/api/xxx/controller`
 3. 类似 `<gm-button>` 的组件，完整的复刻了element-plus的组件，只是样式上做了调整，使用时请参考element-plus的文档
 4. 当前的代码都处于vue3 + giime（类似element-plus的组件库） + tailwindcss 环境中
 5. 当你发现你已经创建了composables/useApiOptions.ts，ts还提示文件不存在，请跳过这个错误，因为可能vscode没有反应过来
 6. @/api 文件夹下的文件可以简单修改，不能新建和删除文件
 7. 写所有功能前都要完整阅读请求文件，请求文件中包含了请求的输入输出，以及请求的注释，请仔细阅读，不要自己编参数
 8. 请求的输入和输出都可以在请求文件中找到，请先阅读请求代码。请严格按照请求文件定义的interface来写代码，可以直接使用这些interface，请求文件在controller下面深层文件夹的某个文件内，你要一层一层的文件夹往下找，直到找到请求文件
+9. 在请求地址说明中，如果我给你请求文件名，则你自己查找到文件，如果我给你请求路由地址，则文件地址就是通过 请求方法+路由地址反推出来的
+   比如 post请求 `/open/v1/system/list` 的文件名是 `postOpenV1SystemList.ts`
+10. 数据源：下拉框、单选框等的数据源，可以根据接口文档的注释来获取。获取后 应该在useXxxOptions中抽离复用。
 
 ## 增删改查 代码模板，供你学习代码规范和风格
 
@@ -155,13 +157,24 @@ const handleDelete = async (row?: SelectIsvAppVo) => {
 };
 </script>
 
-components/Search.vue ```vue
+components/Search.vue 
+
+如果无需级联选择器的话，无需selectedSysName相关代码
+```vue
 <template>
   <section>
     <gm-search-form v-show="showSearch" v-model:query-params="queryParams" @handle-query="handleQuery" @reset-query="resetQuery">
       <gm-search-form-input prop="appName" label="应用名称" />
       <gm-search-form-select prop="status" label="应用状态" :options="statusOptions" />
       <gm-search-form-select prop="authMode" label="鉴权模式" :options="authModeOptions" />
+      <gm-search-form-cascader
+        v-model="selectedSysName"
+        prop="undefined1"
+        label="所属系统"
+        :options="systemTreeStore.systemTree"
+        :cascader-props="{ value: 'id', label: 'name', children: 'children' }"
+        @change="handleSelectedSysNameChange"
+      />
       <gm-search-form-date-picker prop="createTime" label="创建" type="daterange" />
     </gm-search-form>
   </section>
@@ -176,9 +189,18 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'getList'): Promise<any>;
 }>();
+const systemTreeStore = useSystemTreeStore();
 const { authModeOptions, statusOptions } = useAppOptions();
 // 列表请求参数
 const queryParams = defineModel<SelectIsvAppReq>('queryParams', { required: true });
+const selectedSysName = ref([]);
+const handleSelectedSysNameChange = () => {
+  if (!selectedSysName.value) {
+    queryParams.value.subId = undefined;
+  } else {
+    queryParams.value.subId = selectedSysName.value.at(-1);
+  }
+};
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.current = 1;
@@ -187,6 +209,8 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   // queryRef.value?.resetFields();
+  selectedSysName.value = [];
+  queryParams.value.subId = undefined;
   handleQuery();
 };
 defineExpose({
