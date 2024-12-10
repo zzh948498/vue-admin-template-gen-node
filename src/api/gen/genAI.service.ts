@@ -8,6 +8,7 @@ import { FeTempsFactory } from './feTemps/feTempsFactory';
 import { readFile } from 'fs-extra';
 import { join } from 'path';
 import { GenAIGetTemplateQueryDto } from './dto/genAI-getTemplate.dto';
+import { getAllFiles } from '@common/utils/getAllFiles';
 
 @Injectable()
 export class GenAIService {
@@ -22,7 +23,20 @@ export class GenAIService {
      */
     async getTemplate(dto?: GenAIGetTemplateQueryDto) {
         const path = dto.path || 'reqs';
-        const instructionsStr = await readFile(join(__dirname, './feTemps/ai/crud/instructions.md'), 'utf-8');
-        return [{ fileName: `/templates/crud/instructions.md`, tempContent: instructionsStr }];
+        const templatesDir = join(__dirname, './feTemps/ai/templates');
+        const files = await getAllFiles(templatesDir);
+        
+        const result = await Promise.all(
+            files.map(async (filePath) => {
+                const relativePath = filePath.replace(templatesDir, '').replace(/\\/g, '/');
+                const content = await readFile(filePath, 'utf-8');
+                return {
+                    fileName: `/templates${relativePath}`,
+                    tempContent: content
+                };
+            })
+        );
+
+        return result;
     }
 }
