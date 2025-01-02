@@ -12,6 +12,6 @@
                 }
             }
         ],
-        "assets": ["**/*.json", "**/*.md"]
+        "assets": ["**/*.json", "**/*.md", "**/.clinerules"]
     }
 }

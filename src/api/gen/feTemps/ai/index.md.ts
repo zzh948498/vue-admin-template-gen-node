@@ -124,10 +124,8 @@ ${editDialogStr}
 地址：${this.dto.apiController}
 
 ## 代码模板
-
-1. 请先执行"zerone ai-md" 终端命令。命令是为了更新模板
-2. 执行完毕后 完整读取\`@reqs/templates/base/general.md\` 理解一下通用说明。
-3. 通用说明读取完毕后，再完整读取\`@reqs/templates/crud/crud.md\`代码模板
+1. 请先了解项目结构
+2. 完整读取\`@reqs/templates/crud/crud.md\`代码模板
 `;
     }
 }

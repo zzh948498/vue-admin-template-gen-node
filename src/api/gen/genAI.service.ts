@@ -7,7 +7,7 @@ import { FeElementPlusTemp } from './feTemps/element.plus';
 import { FeTempsFactory } from './feTemps/feTempsFactory';
 import { readFile } from 'fs-extra';
 import { join } from 'path';
-import { GenAIGetTemplateQueryDto } from './dto/genAI-getTemplate.dto';
+import { GenAIGetTemplateQueryDto, GenAIGetTemplateResultDto } from './dto/genAI-getTemplate.dto';
 import { getAllFiles } from '@common/utils/getAllFiles';
 
 @Injectable()
@@ -25,18 +25,33 @@ export class GenAIService {
         const path = dto.path || 'reqs';
         const templatesDir = join(__dirname, './feTemps/ai/templates');
         const files = await getAllFiles(templatesDir);
-        
-        const result = await Promise.all(
-            files.map(async (filePath) => {
+
+        let result: GenAIGetTemplateResultDto[] = await Promise.all(
+            files.map(async filePath => {
                 const relativePath = filePath.replace(templatesDir, '').replace(/\\/g, '/');
                 const content = await readFile(filePath, 'utf-8');
                 return {
                     fileName: `/templates${relativePath}`,
-                    tempContent: content
+                    tempContent: content,
                 };
             })
         );
-
+        // Add root directory files
+        const rootDir = join(__dirname, './feTemps/ai/root');
+        const rootFiles = await getAllFiles(rootDir);
+        const rootResults = await Promise.all(
+            rootFiles.map(async filePath => {
+                const fileName = filePath.replace(rootDir, '').replace(/\\/g, '/').substring(1); // Remove leading slash
+                const content = await readFile(filePath, 'utf-8');
+                return {
+                    fileName,
+                    tempContent: content,
+                    fileBasePath: 'root'
+                };
+            })
+        );
+        // return rootResults
+        result = [...result, ...rootResults];
         return result;
     }
 }

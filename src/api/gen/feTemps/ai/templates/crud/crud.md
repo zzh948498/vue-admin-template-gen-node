@@ -1,12 +1,16 @@
 ## 增删改查 代码模板，供你学习代码规范和风格
 
-crud的代码应该都在modules目录
+1. 代码模板中包含增删改查功能的基本实现，请根据实际需求进行调整。
+2. 代码模板中的请求地址为示例地址，请根据实际情况修改为真实请求地址。
+3. 代码模板中的参数和返回数据结构为示例，请根据实际情况进行调整。
+4. 调用请求 逻辑部分可以使用useLoading工具函数，给予用户更好的体验。如果已经内置了isLoading 就不用加了
+6. 模块拆分完整，不能少文件
 
 index.vue
 
 ````vue
 <template>
-  <gm-table-ctx :tableId="tableId" class="p-5">
+  <gm-table-ctx class="p-5" :tableId="tableId">
     <h1 class="mb-6 font-bold">你的标题</h1>
     <!-- 搜索 -->
     <Search v-model:queryParams="queryParams" :showSearch="showSearch" @getList="getList" />
@@ -14,10 +18,10 @@ index.vue
     <TableToolbar
       v-model:showSearch="showSearch"
       v-model:queryParams="queryParams"
+      class="mb-3"
       :notSelected="notSelected"
       :total="total"
       :selectedIds="selectedIds"
-      class="mb-3"
       @openAddForm="editDialogRef?.openAddForm"
       @batchDelete="handleDelete()"
       @getList="getList"
@@ -52,7 +56,29 @@ import type { TableProSortValue } from 'giime';
 // 接口
 import type { SelectIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
 import { postOpenV1IsvAppPage, postOpenV1IsvAppRemove } from '@/api/open/controller';
-const route = useRoute();
+</script>
+
+components/Search.vue 如果无需级联选择器的话，无需selectedSysName相关代码 ```vue
+<template>
+  <section>
+    <gm-search-form v-show="showSearch" v-model:query-params="queryParams" @handle-query="handleQuery" @reset-query="resetQuery">
+      <gm-search-form-input prop="appName" label="应用名称" />
+      <gm-search-form-select prop="status" label="应用状态" :options="statusOptions" />
+      <gm-search-form-select prop="authMode" label="鉴权模式" :options="authModeOptions" />
+      <gm-search-form-cascader
+        v-model="selectedSysName"
+        prop="undefined1"
+        label="所属系统"
+        :options="systemTreeStore.systemTree"
+        :cascader-props="{ value: 'id', label: 'name', children: 'children' }"
+        @change="handleSelectedSysNameChange"
+      />
+      <gm-search-form-date-picker prop="createTime" label="创建" type="daterange" />
+    </gm-search-form>
+  </section>
+</template>
+<script lang="ts" setup>
+// const route = useRoute();
 const editDialogRef = ref<InstanceType<typeof EditDialog>>();
 
 const { tableId } = useAppOptions();
@@ -91,6 +117,7 @@ const getList = async () => {
     ...queryParams.value,
     sorts: sortValue.value,
   });
+
   if (data?.code !== 200) {
     return;
   }
@@ -108,8 +135,10 @@ const handleSelectionChange: (value: any[]) => any = (selection: SelectIsvAppVo[
 /** 删除按钮操作 */
 const handleDelete = async (row?: SelectIsvAppVo) => {
   const selectIds = row ? [row.id] : selectedIds.value;
+
   GmConfirmBox({ message: `请确定是否删除，删除后不可恢复！` }, async () => {
     const { data } = await postOpenV1IsvAppRemove({ ids: selectIds });
+
     if (data.code !== 200) {
       return;
     }
@@ -117,30 +146,6 @@ const handleDelete = async (row?: SelectIsvAppVo) => {
     getList();
   });
 };
-</script>
-
-components/Search.vue 如果无需级联选择器的话，无需selectedSysName相关代码 ```vue
-<template>
-  <section>
-    <gm-search-form v-show="showSearch" v-model:query-params="queryParams" @handle-query="handleQuery" @reset-query="resetQuery">
-      <gm-search-form-input prop="appName" label="应用名称" />
-      <gm-search-form-select prop="status" label="应用状态" :options="statusOptions" />
-      <gm-search-form-select prop="authMode" label="鉴权模式" :options="authModeOptions" />
-      <gm-search-form-cascader
-        v-model="selectedSysName"
-        prop="undefined1"
-        label="所属系统"
-        :options="systemTreeStore.systemTree"
-        :cascader-props="{ value: 'id', label: 'name', children: 'children' }"
-        @change="handleSelectedSysNameChange"
-      />
-      <gm-search-form-date-picker prop="createTime" label="创建" type="daterange" />
-    </gm-search-form>
-  </section>
-</template>
-<script lang="ts" setup>
-import { useAppOptions } from '../composables/useAppOptions';
-import type { SelectIsvAppReq } from '@/api/open/interface';
 
 defineProps<{
   showSearch: boolean;
@@ -172,6 +177,7 @@ const resetQuery = () => {
   queryParams.value.subId = undefined;
   handleQuery();
 };
+
 defineExpose({
   queryParams,
 });
@@ -207,6 +213,7 @@ components/TableToolbar
 import { useAppOptions } from '../composables/useAppOptions';
 import type { SelectIsvAppReq } from '@/api/open/interface';
 import { postOpenV1IsvAppModifyStatus } from '@/api/open/controller';
+
 const props = defineProps<{
   notSelected: boolean;
   total: number;
@@ -227,6 +234,7 @@ const handleBatchModifyStatus = async (status: number) => {
   // const selectIds = row ? [row.id] : selectedIds.value;
   GmConfirmBox({ message: `确定要禁用该应用吗？` }, async () => {
     const { data } = await postOpenV1IsvAppModifyStatus({ ids: props.selectedIds, status });
+
     if (data.code !== 200) {
       return;
     }
@@ -251,7 +259,7 @@ components/Table.vue
       @selectionChange="emit('selectionChange', $event)"
       @sortChange="emit('getList')"
     >
-      <gm-table-column-pro label="应用信息" align="left" prop="appName" show-overflow-tooltip min-width="330">
+      <gm-table-column-pro show-overflow-tooltip label="应用信息" align="left" prop="appName" min-width="330">
         <template #default="{ row }: { row: SelectIsvAppVo }">
           <div class="flex items-center gap-3">
             <gm-avatar
@@ -278,7 +286,7 @@ client_secret: ${row.clientSecret}`"
       <gm-table-column-pro label="应用描述" align="left" prop="appDesc" width="250">
         <template #default="{ row }: { row: SelectIsvAppVo }">
           <div>
-            <el-tooltip effect="dark" :content="row.appDesc" placement="top">
+            <el-tooltip effect="dark" placement="top" :content="row.appDesc">
               <template #content>
                 <div class="max-w-[300px] whitespace-break-spaces">{{ row.appDesc }}</div>
               </template>
@@ -287,7 +295,7 @@ client_secret: ${row.clientSecret}`"
           </div>
         </template>
       </gm-table-column-pro>
-      <gm-table-column-pro label="应用IP" align="left" prop="appIp" show-overflow-tooltip width="140">
+      <gm-table-column-pro show-overflow-tooltip label="应用IP" align="left" prop="appIp" width="140">
         <template #default="{ row }: { row: SelectIsvAppVo }">
           <div v-for="(item, index) in row.appIp?.split(',') ?? []" :key="index">
             {{ item }}
@@ -307,26 +315,26 @@ client_secret: ${row.clientSecret}`"
         <template #default="{ row }: { row: SelectIsvAppVo }">
           <el-switch
             v-model="row.status"
-            :active-value="1"
-            :inactive-value="0"
-            class="ml-2"
-            :loading="modifyStatusLoading"
-            size="large"
             inline-prompt
+            class="ml-2"
+            size="large"
             active-text="正常"
             inactive-text="禁用"
+            :active-value="1"
+            :inactive-value="0"
+            :loading="modifyStatusLoading"
             :before-change="() => beforeChangeStatus(row)"
           />
         </template>
       </gm-table-column-pro>
       <gm-table-column-pro label="client_id" align="left" prop="clientId" width="180" />
       <gm-table-column-pro label="client_secret" align="left" prop="clientSecret" width="180" />
-      <gm-table-column-pro label="创建时间" align="left" prop="createTime" width="180" min-width="180" isSort>
+      <gm-table-column-pro isSort label="创建时间" align="left" prop="createTime" width="180" min-width="180">
         <template #default="scope">
           <span>{{ scope.row.createTime }}</span>
         </template>
       </gm-table-column-pro>
-      <gm-table-column-pro label="更新时间" align="left" prop="updateTime" width="180" min-width="180" isSort>
+      <gm-table-column-pro isSort label="更新时间" align="left" prop="updateTime" width="180" min-width="180">
         <template #default="scope">
           <span>{{ scope.row.updateTime }}</span>
         </template>
@@ -369,6 +377,7 @@ const { tableId, authModeOptions, statusOptions } = useAppOptions();
 const { isLoading: modifyStatusLoading, exec: modifyStatusExec } = useLoading(postOpenV1IsvAppModifyStatus);
 const beforeChangeStatus = async (row: SelectIsvAppVo) => {
   const { data } = await modifyStatusExec({ ids: [row.id], status: row.status === 1 ? 0 : 1 });
+
   if (data.code !== 200) {
     return false;
   }
@@ -387,7 +396,7 @@ components/EditDialog.vue
 ```vue
 <template>
   <!-- 添加/修改对话框 -->
-  <gm-dialog v-model="editDialogVisible" :title="isAddDialog ? '创建应用' : '编辑应用'" width="500px" append-to-body @closed="cancel">
+  <gm-dialog v-model="editDialogVisible" append-to-body width="500px" :title="isAddDialog ? '创建应用' : '编辑应用'" @closed="cancel">
     <EditForm ref="editFormRef" v-model:editForm="editForm" @getList="emit('getList')" />
     <template #footer>
       <div class="dialog-footer">
@@ -404,6 +413,7 @@ import EditForm from './EditForm.vue';
 import type { AddIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
 import { postOpenV1IsvAppModify, postOpenV1IsvAppSave } from '@/api/open/controller';
 import { useCompanyStore } from '@/modules/company/stores/companyStore';
+
 const companyStore = useCompanyStore();
 
 const emit = defineEmits<{
@@ -432,6 +442,7 @@ const openAddForm = () => {
   editDialogVisible.value = true;
   isAddDialog.value = true;
 };
+
 /** 取消按钮 */
 function cancel() {
   editDialogVisible.value = false;
@@ -471,6 +482,7 @@ const submitForm = async () => {
   submitLoading.value = true;
   try {
     let res: { data: { code: number } };
+
     if (!fromId.value) {
       // 新增
       res = await postOpenV1IsvAppSave({
@@ -496,6 +508,7 @@ const submitForm = async () => {
     console.error(e);
   }
 };
+
 defineExpose({
   openAddForm,
   openUpdateForm,
@@ -508,18 +521,18 @@ components/EditForm.vue
 ```vue
 <template>
   <div>
-    <gm-form ref="editFormRef" :model="editForm" :rules="rules" label-width="auto">
+    <gm-form ref="editFormRef" label-width="auto" :model="editForm" :rules="rules">
       <gm-form-item label="应用名称" prop="appName">
-        <gm-input v-model="editForm.appName" placeholder="请输入应用名称" maxlength="50" show-word-limit />
+        <gm-input v-model="editForm.appName" show-word-limit placeholder="请输入应用名称" maxlength="50" />
       </gm-form-item>
       <gm-form-item label="应用描述" prop="appDesc">
-        <gm-input v-model="editForm.appDesc" type="textarea" placeholder="请输入应用描述" :rows="4" maxlength="200" show-word-limit />
+        <gm-input v-model="editForm.appDesc" show-word-limit type="textarea" placeholder="请输入应用描述" maxlength="200" :rows="4" />
       </gm-form-item>
       <gm-form-item label="应用IP" prop="appIp">
-        <gm-input v-model="editForm.appIp" placeholder="请输入应用IP" maxlength="100" show-word-limit />
+        <gm-input v-model="editForm.appIp" show-word-limit placeholder="请输入应用IP" maxlength="100" />
       </gm-form-item>
       <gm-form-item label="应用首页地址" prop="appHome">
-        <gm-input v-model="editForm.appHome" placeholder="请输入应用首页地址" maxlength="100" show-word-limit />
+        <gm-input v-model="editForm.appHome" show-word-limit placeholder="请输入应用首页地址" maxlength="100" />
       </gm-form-item>
       <gm-form-item label="鉴权模式" prop="authMode">
         <template #label>
@@ -558,6 +571,7 @@ const resetFields = () => {
 const validate = () => {
   return editFormRef.value?.validate();
 };
+
 defineExpose({
   resetFields,
   validate,
@@ -598,6 +612,7 @@ export const useAppOptions = () => {
     serviceCount: [{ required: true, message: '开通服务数量不能为空', trigger: 'blur' }],
     updateTime: [{ required: true, message: '更新时间不能为空', trigger: 'blur' }],
   };
+
   return {
     tableId,
     rules,

@@ -13,6 +13,11 @@ export class GenAIGetTemplateResultDto {
      */
     @ApiProperty()
     tempContent: string;
+    /**
+     * 文件基础路径
+     */
+    @ApiProperty()
+    fileBasePath?: string;
 }
 export class GenAIGetTemplateQueryDto {
     /**
@@ -20,5 +25,4 @@ export class GenAIGetTemplateQueryDto {
      */
     @ApiProperty()
     path?: string;
-
 }
