@@ -4,11 +4,12 @@
 2. 代码模板中的请求地址为示例地址，请根据实际情况修改为真实请求地址。
 3. 代码模板中的参数和返回数据结构为示例，请根据实际情况进行调整。
 4. 调用请求 逻辑部分可以使用useLoading工具函数，给予用户更好的体验。如果已经内置了isLoading 就不用加了
-6. 模块拆分完整，不能少文件
+5. 模块拆分完整，不能少文件
+6. 如果项目中包含`modules` 和 `views`模块，那么下面的代码都应该出现在`modules`目录下
 
 index.vue
 
-````vue
+```vue
 <template>
   <gm-table-ctx class="p-5" :tableId="tableId">
     <h1 class="mb-6 font-bold">你的标题</h1>
@@ -44,8 +45,8 @@ index.vue
 </template>
 
 <script setup lang="ts">
-import { useLoading } from 'giime';
-import { useRoute } from 'vue-router';
+import { GmConfirmBox, useLoading } from 'giime';
+// import { useRoute } from 'vue-router';
 import EditDialog from './components/EditDialog.vue';
 import Search from './components/Search.vue';
 import Table from './components/Table.vue';
@@ -56,28 +57,7 @@ import type { TableProSortValue } from 'giime';
 // 接口
 import type { SelectIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
 import { postOpenV1IsvAppPage, postOpenV1IsvAppRemove } from '@/api/open/controller';
-</script>
 
-components/Search.vue 如果无需级联选择器的话，无需selectedSysName相关代码 ```vue
-<template>
-  <section>
-    <gm-search-form v-show="showSearch" v-model:query-params="queryParams" @handle-query="handleQuery" @reset-query="resetQuery">
-      <gm-search-form-input prop="appName" label="应用名称" />
-      <gm-search-form-select prop="status" label="应用状态" :options="statusOptions" />
-      <gm-search-form-select prop="authMode" label="鉴权模式" :options="authModeOptions" />
-      <gm-search-form-cascader
-        v-model="selectedSysName"
-        prop="undefined1"
-        label="所属系统"
-        :options="systemTreeStore.systemTree"
-        :cascader-props="{ value: 'id', label: 'name', children: 'children' }"
-        @change="handleSelectedSysNameChange"
-      />
-      <gm-search-form-date-picker prop="createTime" label="创建" type="daterange" />
-    </gm-search-form>
-  </section>
-</template>
-<script lang="ts" setup>
 // const route = useRoute();
 const editDialogRef = ref<InstanceType<typeof EditDialog>>();
 
@@ -146,6 +126,33 @@ const handleDelete = async (row?: SelectIsvAppVo) => {
     getList();
   });
 };
+</script>
+```
+
+components/Search.vue 如果无需级联选择器的话，无需selectedSysName相关代码
+
+```vue
+<template>
+  <section>
+    <gm-search-form v-show="showSearch" v-model:query-params="queryParams" @handle-query="handleQuery" @reset-query="resetQuery">
+      <gm-search-form-input prop="appName" label="应用名称" />
+      <gm-search-form-select prop="status" label="应用状态" :options="statusOptions" />
+      <gm-search-form-select prop="authMode" label="鉴权模式" :options="authModeOptions" />
+      <gm-search-form-cascader
+        v-model="selectedSysName"
+        prop="undefined1"
+        label="所属系统"
+        :options="systemTreeStore.systemTree"
+        :cascader-props="{ value: 'id', label: 'name', children: 'children' }"
+        @change="handleSelectedSysNameChange"
+      />
+      <gm-search-form-date-picker prop="createTime" label="创建" type="daterange" />
+    </gm-search-form>
+  </section>
+</template>
+<script lang="ts" setup>
+import { useAppOptions } from '../composables/useAppOptions';
+import type { SelectIsvAppReq } from '@/api/open/interface';
 
 defineProps<{
   showSearch: boolean;
@@ -182,7 +189,7 @@ defineExpose({
   queryParams,
 });
 </script>
-````
+```
 
 components/TableToolbar
 
@@ -372,7 +379,7 @@ const sortValue = defineModel<TableProSortValue[]>('sortValue', { required: true
 
 const subscribeServiceDialogRef = ref<InstanceType<typeof SubscribeServiceDialog>>();
 
-const { tableId, authModeOptions, statusOptions } = useAppOptions();
+const { tableId, authModeOptions } = useAppOptions();
 
 const { isLoading: modifyStatusLoading, exec: modifyStatusExec } = useLoading(postOpenV1IsvAppModifyStatus);
 const beforeChangeStatus = async (row: SelectIsvAppVo) => {
@@ -563,7 +570,7 @@ import type { AddIsvAppReq } from '@/api/open/interface';
 const editForm = defineModel<AddIsvAppReq>('editForm', { required: true });
 const editFormRef = ref<FormInstance>();
 
-const { authModeOptions, statusOptions, rules } = useAppOptions();
+const { authModeOptions, rules } = useAppOptions();
 
 const resetFields = () => {
   return editFormRef.value?.resetFields();
@@ -581,7 +588,7 @@ defineExpose({
 
 composables/useAppOptions.ts
 
-注意：tableId你应该自己生成一个，写死一个就行，不要使用我提供的这个。
+注意：tableId你应该自己生成一个，写死一个就行，不要使用我提供的这个。写死的也应该是你自己生成的uuid，注意不是引入uuid这个库
 
 ```ts
 export const useAppOptions = () => {

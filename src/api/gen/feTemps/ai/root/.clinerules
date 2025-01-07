@@ -1,18 +1,21 @@
 # 项目规则
 
+1. 优先且严格遵循项目规则，而不是个人习惯。
+2. 如果规则或者需求有什么不明白的，请第一时间和我沟通，我确认后再进行下一步。
+
 ## 1. 编码规则
 
-- 函数和变量使用 尽量使用camelCase
-- 文件大小最大为 300 行
-- 每个方法和变量定义时，请添加适量 JSDoc 注释，使用中文
-- 函数内部添加适量的单行注释，注释使用中文
+1. 函数和变量使用 尽量使用camelCase
+2. 文件大小最大为 300 行
+3. 每个方法和变量定义时，请添加适量 JSDoc 注释，使用中文
+4. 函数内部添加适量的单行注释，注释使用中文
 
 ## 2. 通用规则
 
 - 务必在会话开始时运行以下命令以了解项目布局：
 
   ```bash
-  tree src /f
+  tree src
   ```
 
 - TypeScript文件导入问题：
@@ -24,10 +27,10 @@
 
   - 保存时会自动执行eslint修复 (`"editor.formatOnSave": true`)
 
-- 导入路径显示问题：
-  - 你可能会看到导入路径显示为 ''stores/app'' (see below for file content) 这样的格式
-  - 这只是显示格式问题，实际代码中已经是 @/stores/app
-  - 请忽略这种显示差异，不需要修复
+- 重要：导入路径显示规则
+  1. 系统会将实际的导入路径(如 `import { xxx } from '@/stores/app'`)显示为 `import { xxx } from ''stores/app''`格式
+  2. 这是正常的显示转换，不是错误 不影响代码的实际执行，严禁尝试"修复"这种显示格式
+  3. 在编写代码时，使用实际的导入路径（@/开头），你读到的内容会自动转换显示格式
 
 ## 3. 接口文件使用规则
 
@@ -36,17 +39,6 @@
 - 文件限制：
 
   - /src/api 文件夹下的文件可以简单修改，不能新建和删除
-
-- 导入规则：
-
-  - 必须使用 `@/api/xxx/controller` 导入
-  - 所有接口已经都在 controller/index.ts 中导出
-  - 不要使用完整路径（如：`@/api/xxx/controller/xxx/xxx`）
-
-- 类型使用：
-
-  - 使用接口文件提供的输入输出类型
-  - 通过import导入类型，避免自行实现interface
 
 - 文件命名：
 
@@ -64,6 +56,47 @@
   3. 在这个例子中，你需要阅读和使用`PostBasicV1VoltageDownloadTplDemoInput`和`PostBasicV1VoltageDownloadTplDemoResult`这两个类型
   4. 数据源：下拉框、单选框等的数据源，可以根据接口文档的注释来获取。获取后 应该在useXxxOptions中抽离复用。
 
+## API模块导入规则
+
+这是一个强制性要求，不仅仅是建议：
+
+1. ✅ 正确的导入方式：
+
+```ts
+// 接口方法导入
+import type { PostGmpV1CrowdListInput } from '@/api/gmp/controller';
+import { postGmpV1CrowdList } from '@/api/gmp/controller';
+// 类型定义导入
+```
+
+2. ❌ 错误的导入方式：
+
+```ts
+// 禁止直接从具体文件导入
+import type { PostGmpV1CrowdListInput } from '@/api/gmp/controller/RenQunGuanLi/postGmpV1CrowdList';
+import { postGmpV1CrowdList } from '@/api/gmp/controller/RenQunGuanLi/postGmpV1CrowdList';
+```
+
+重要说明：
+
+- 这个规则同时适用于方法导入和类型导入
+- 所有接口和类型都应该从controller/index.ts（或interface/index.ts）统一导出
+- 即使IDE自动补全显示完整路径，也要手动修改为简化路径
+- 这样做的目的是降低代码耦合度，方便后期维护和重构
+
+影响：
+
+- 提高代码可维护性
+- 降低重构成本
+- 保持接口引用的一致性
+- 方便统一管理API变更
+
+注意：
+
+- 在开发时要特别注意类型导入，不要被IDE的自动补全误导
+- Code Review时应该重点检查API的导入方式
+- 如果发现使用了完整路径，必须修改为从controller导入
+
 ## 4. 项目技术栈
 
 - 基础技术：
@@ -74,5 +107,8 @@
   - 状态管理：pinia
 
 - UI框架：
+
   - 优先使用 giime（与element-plus语法一致）
   - 特殊需求时可使用 element-plus
+
+- 当前系统：Windows
