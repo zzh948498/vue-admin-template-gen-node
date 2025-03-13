@@ -9,8 +9,8 @@
             "type": "node",
             "request": "launch",
             "args": [
-                // "${relativeFile}"
-                "${workspaceFolder}/src/main.ts",
+                "${relativeFile}"
+                // "${workspaceFolder}/src/main.ts",
             ],
             "runtimeArgs": [
                 "-r",

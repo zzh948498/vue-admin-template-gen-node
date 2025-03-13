@@ -6,6 +6,9 @@
 4. 调用请求 逻辑部分可以使用useLoading工具函数，给予用户更好的体验。如果已经内置了isLoading 就不用加了
 5. 模块拆分完整，不能少文件
 6. 如果项目中包含`modules` 和 `views`模块，那么下面的代码都应该出现在`modules`目录下
+7. use开头的接口文件 已内置useLoading。
+8. useAppOptions只是一个demo，请根据实际模块调整为`useXXXOptions`
+9. 以下文件按包涵顺序创建，比如子组件完成后 再创建index.vue
 
 index.vue
 
@@ -45,7 +48,7 @@ index.vue
 </template>
 
 <script setup lang="ts">
-import { GmConfirmBox, useLoading } from 'giime';
+import { GmConfirmBox } from 'giime';
 // import { useRoute } from 'vue-router';
 import EditDialog from './components/EditDialog.vue';
 import Search from './components/Search.vue';
@@ -56,7 +59,7 @@ import type { TableProSortValue } from 'giime';
 
 // 接口
 import type { SelectIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
-import { postOpenV1IsvAppPage, postOpenV1IsvAppRemove } from '@/api/open/controller';
+import { postOpenV1IsvAppRemove, usePostOpenV1IsvAppPage } from '@/api/open/controller';
 
 // const route = useRoute();
 const editDialogRef = ref<InstanceType<typeof EditDialog>>();
@@ -90,7 +93,7 @@ const queryParams = ref<SelectIsvAppReq>({
 
 const sortValue = ref<TableProSortValue[]>([]);
 const listData = ref<SelectIsvAppVo[]>([]);
-const { isLoading, exec: getListExec } = useLoading(postOpenV1IsvAppPage);
+const { isLoading, exec: getListExec } = usePostOpenV1IsvAppPage();
 /** 获取列表 */
 const getList = async () => {
   const { data } = await getListExec({
@@ -98,11 +101,8 @@ const getList = async () => {
     sorts: sortValue.value,
   });
 
-  if (data?.code !== 200) {
-    return;
-  }
-  listData.value = data?.data.records || [];
-  total.value = data?.data.total || 0;
+  listData.value = data.value?.data.records || [];
+  total.value = data.value?.data.total || 0;
 };
 
 /** 多选框选中数据 */
@@ -117,11 +117,7 @@ const handleDelete = async (row?: SelectIsvAppVo) => {
   const selectIds = row ? [row.id] : selectedIds.value;
 
   GmConfirmBox({ message: `请确定是否删除，删除后不可恢复！` }, async () => {
-    const { data } = await postOpenV1IsvAppRemove({ ids: selectIds });
-
-    if (data.code !== 200) {
-      return;
-    }
+    await postOpenV1IsvAppRemove({ ids: selectIds });
     GmMessage.success('删除成功');
     getList();
   });
@@ -240,11 +236,8 @@ const { tableId } = useAppOptions();
 const handleBatchModifyStatus = async (status: number) => {
   // const selectIds = row ? [row.id] : selectedIds.value;
   GmConfirmBox({ message: `确定要禁用该应用吗？` }, async () => {
-    const { data } = await postOpenV1IsvAppModifyStatus({ ids: props.selectedIds, status });
+    await postOpenV1IsvAppModifyStatus({ ids: props.selectedIds, status });
 
-    if (data.code !== 200) {
-      return;
-    }
     GmMessage.success('禁用成功');
     emit('getList');
   });
@@ -383,11 +376,7 @@ const { tableId, authModeOptions } = useAppOptions();
 
 const { isLoading: modifyStatusLoading, exec: modifyStatusExec } = useLoading(postOpenV1IsvAppModifyStatus);
 const beforeChangeStatus = async (row: SelectIsvAppVo) => {
-  const { data } = await modifyStatusExec({ ids: [row.id], status: row.status === 1 ? 0 : 1 });
-
-  if (data.code !== 200) {
-    return false;
-  }
+  await modifyStatusExec({ ids: [row.id], status: row.status === 1 ? 0 : 1 });
 
   return true;
 };
@@ -407,7 +396,7 @@ components/EditDialog.vue
     <EditForm ref="editFormRef" v-model:editForm="editForm" @getList="emit('getList')" />
     <template #footer>
       <div class="dialog-footer">
-        <gm-button type="primary" :loading="submitLoading" @click="submitForm">确 定</gm-button>
+        <gm-button type="primary" :loading="isSubmitLoading" @click="submitForm">确 定</gm-button>
         <gm-button @click="cancel">取 消</gm-button>
       </div>
     </template>
@@ -415,7 +404,7 @@ components/EditDialog.vue
 </template>
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash-es';
-import { resetObject } from 'giime';
+import { resetObject, useLoading } from 'giime';
 import EditForm from './EditForm.vue';
 import type { AddIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
 import { postOpenV1IsvAppModify, postOpenV1IsvAppSave } from '@/api/open/controller';
@@ -475,46 +464,33 @@ const openUpdateForm = (row: SelectIsvAppVo) => {
   editDialogVisible.value = true;
 };
 
-const submitLoading = ref(false);
 /** 提交按钮 */
-const submitForm = async () => {
-  try {
-    await editFormRef.value?.validate?.();
-  } catch (e) {
-    return console.error(e);
-  }
+const submitFormBase = async () => {
+  await editFormRef.value?.validate?.();
+
   if (!companyStore.activeCompany?.corpId) {
     return;
   }
-  submitLoading.value = true;
-  try {
-    let res: { data: { code: number } };
 
-    if (!fromId.value) {
-      // 新增
-      res = await postOpenV1IsvAppSave({
-        ...editForm.value,
-        corpId: companyStore.activeCompany.corpId,
-      });
-    } else {
-      // 修改
-      res = await postOpenV1IsvAppModify({ ...editForm.value, id: fromId.value });
-    }
-    submitLoading.value = false;
-    if (res.data.code !== 200) {
-      return;
-    }
-    if (isAddDialog.value) {
-      companyStore.getList();
-    }
-    GmMessage.success('操作成功');
-    editDialogVisible.value = false;
-    emit('getList');
-  } catch (e) {
-    submitLoading.value = false;
-    console.error(e);
+  if (!fromId.value) {
+    // 新增
+    await postOpenV1IsvAppSave({
+      ...editForm.value,
+      corpId: companyStore.activeCompany.corpId,
+    });
+  } else {
+    // 修改
+    await postOpenV1IsvAppModify({ ...editForm.value, id: fromId.value });
   }
+
+  if (isAddDialog.value) {
+    companyStore.getList();
+  }
+  GmMessage.success('操作成功');
+  editDialogVisible.value = false;
+  emit('getList');
 };
+const { isLoading: isSubmitLoading, exec: submitForm } = useLoading(submitFormBase);
 
 defineExpose({
   openAddForm,
@@ -588,7 +564,7 @@ defineExpose({
 
 composables/useAppOptions.ts
 
-注意：tableId你应该自己生成一个，写死一个就行，不要使用我提供的这个。写死的也应该是你自己生成的uuid，注意不是引入uuid这个库
+注意：tableId你应该自己生成一个，写死一个就行，不要使用uuid这个库动态生成，也不要使用我提供的这个。保证能uuid级别的唯一即可。
 
 ```ts
 export const useAppOptions = () => {

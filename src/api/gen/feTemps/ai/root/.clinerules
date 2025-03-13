@@ -6,7 +6,7 @@
 ## 1. 编码规则
 
 1. 函数和变量使用 尽量使用camelCase
-2. 文件大小最大为 300 行
+2. js/ts/vue 文件代码行数最大为 300 行
 3. 每个方法和变量定义时，请添加适量 JSDoc 注释，使用中文
 4. 函数内部添加适量的单行注释，注释使用中文
 
@@ -26,11 +26,6 @@
 - 自动格式化：
 
   - 保存时会自动执行eslint修复 (`"editor.formatOnSave": true`)
-
-- 重要：导入路径显示规则
-  1. 系统会将实际的导入路径(如 `import { xxx } from '@/stores/app'`)显示为 `import { xxx } from ''stores/app''`格式
-  2. 这是正常的显示转换，不是错误 不影响代码的实际执行，严禁尝试"修复"这种显示格式
-  3. 在编写代码时，使用实际的导入路径（@/开头），你读到的内容会自动转换显示格式
 
 ## 3. 接口文件使用规则
 
@@ -108,7 +103,7 @@ import { postGmpV1CrowdList } from '@/api/gmp/controller/RenQunGuanLi/postGmpV1C
 
 - UI框架：
 
-  - 优先使用 giime（与element-plus语法一致）
+  - 优先使用 giime，giime继承和扩展了element-plus，`el-`开头的组件，均可使用`gm-`
   - 特殊需求时可使用 element-plus
 
 - 当前系统：Windows
