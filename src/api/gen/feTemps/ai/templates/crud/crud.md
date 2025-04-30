@@ -8,7 +8,7 @@
 6. 如果项目中包含`modules` 和 `views`模块，那么下面的代码都应该出现在`modules`目录下
 7. use开头的接口文件 已内置useLoading。
 8. useAppOptions只是一个demo，请根据实际模块调整为`useXXXOptions`
-9. 以下文件按包涵顺序创建，比如子组件完成后 再创建index.vue
+9. 以下文件按包涵顺序创建，比如子组件完成后 再创建index.vue。下面的模板是关于 `应用管理` 相关功能
 
 index.vue
 
@@ -330,17 +330,17 @@ client_secret: ${row.clientSecret}`"
       <gm-table-column-pro label="client_id" align="left" prop="clientId" width="180" />
       <gm-table-column-pro label="client_secret" align="left" prop="clientSecret" width="180" />
       <gm-table-column-pro isSort label="创建时间" align="left" prop="createTime" width="180" min-width="180">
-        <template #default="scope">
-          <span>{{ scope.row.createTime }}</span>
+        <template #default="{ row }: { row: SelectIsvAppVo }">
+          <span>{{ row.createTime }}</span>
         </template>
       </gm-table-column-pro>
       <gm-table-column-pro isSort label="更新时间" align="left" prop="updateTime" width="180" min-width="180">
-        <template #default="scope">
-          <span>{{ scope.row.updateTime }}</span>
+       <template #default="{ row }: { row: SelectIsvAppVo }">
+          <span>{{ row.updateTime }}</span>
         </template>
       </gm-table-column-pro>
       <gm-table-column-pro prop="" type="edit">
-        <template #default="{ row }">
+        <template #default="{ row }: { row: SelectIsvAppVo }">
           <gm-operate-button label="编辑" prop="edit" type="primary" class="mb-1 mr-1" @click="emit('openUpdateForm', row)" />
           <gm-operate-button label="删除" prop="delete" type="primary" class="mb-1" @click="emit('handleDelete', row)" />
           <gm-operate-button label="开通服务" prop="subscribe" type="primary" :disabled="row.status === 0" @click="handleSubscribe(row)" />
@@ -392,7 +392,7 @@ components/EditDialog.vue
 ```vue
 <template>
   <!-- 添加/修改对话框 -->
-  <gm-dialog v-model="editDialogVisible" append-to-body width="500px" :title="isAddDialog ? '创建应用' : '编辑应用'" @closed="cancel">
+  <gm-dialog v-model="editDialogVisible" append-to-body width="500px" :title="dialogTitle" @closed="cancel">
     <EditForm ref="editFormRef" v-model:editForm="editForm" @getList="emit('getList')" />
     <template #footer>
       <div class="dialog-footer">
@@ -405,24 +405,29 @@ components/EditDialog.vue
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash-es';
 import { resetObject, useLoading } from 'giime';
+import { AppEditDialogType } from '../composables/types';
+import { useAppOptions } from '../composables/useAppOptions';
 import EditForm from './EditForm.vue';
 import type { AddIsvAppReq, SelectIsvAppVo } from '@/api/open/interface';
 import { postOpenV1IsvAppModify, postOpenV1IsvAppSave } from '@/api/open/controller';
 import { useCompanyStore } from '@/modules/company/stores/companyStore';
 
-const companyStore = useCompanyStore();
-
 const emit = defineEmits<{
   (e: 'getList'): Promise<any>;
 }>();
 
+const companyStore = useCompanyStore();
+
+const { dialogTitleOptions } = useAppOptions();
+/**弹窗标题 */
+const dialogTitle = computed(() => dialogTitleOptions.find(item => item.value === dialogType.value)?.label);
 /**
  * 编辑表单
  */
 const editDialogVisible = ref(false);
-const isAddDialog = ref(true);
+const dialogType = ref(AppEditDialogType.ADD);
 const editFormRef = ref<InstanceType<typeof EditForm>>();
-const fromId = ref(0);
+const formId = ref(0);
 const defaultEditForm: AddIsvAppReq = {
   corpId: '',
   appName: '',
@@ -436,7 +441,7 @@ const editForm = ref(cloneDeep(defaultEditForm));
 /** 新增按钮操作 */
 const openAddForm = () => {
   editDialogVisible.value = true;
-  isAddDialog.value = true;
+  dialogType.value = AppEditDialogType.ADD;
 };
 
 /** 取消按钮 */
@@ -446,7 +451,7 @@ function cancel() {
 }
 /** 表单重置 */
 function reset() {
-  fromId.value = 0;
+  formId.value = 0;
   // 表单加载可能有延迟   会导致重置失败
   editFormRef.value?.resetFields?.();
   // 手动重置
@@ -456,10 +461,10 @@ function reset() {
 /** 修改按钮操作 */
 const openUpdateForm = (row: SelectIsvAppVo) => {
   reset();
-  isAddDialog.value = false;
+  dialogType.value = AppEditDialogType.EDIT;
   // 如果需要从接口获取详情
   // const { data } = await getItemById({ id: selectId });
-  fromId.value = row.id;
+  formId.value = row.id;
   resetObject(editForm.value, row);
   editDialogVisible.value = true;
 };
@@ -472,7 +477,7 @@ const submitFormBase = async () => {
     return;
   }
 
-  if (!fromId.value) {
+  if (!formId.value) {
     // 新增
     await postOpenV1IsvAppSave({
       ...editForm.value,
@@ -480,10 +485,10 @@ const submitFormBase = async () => {
     });
   } else {
     // 修改
-    await postOpenV1IsvAppModify({ ...editForm.value, id: fromId.value });
+    await postOpenV1IsvAppModify({ ...editForm.value, id: formId.value });
   }
 
-  if (isAddDialog.value) {
+  if (dialogType.value === AppEditDialogType.ADD) {
     companyStore.getList();
   }
   GmMessage.success('操作成功');
@@ -562,16 +567,36 @@ defineExpose({
 </script>
 ```
 
+composables/types.ts
+
+```ts
+/**表单弹窗类型 */
+export enum AppEditDialogType {
+  /**添加 */
+  ADD = 'add',
+  /**编辑 */
+  EDIT = 'edit',
+}
+```
+
 composables/useAppOptions.ts
 
 注意：tableId你应该自己生成一个，写死一个就行，不要使用uuid这个库动态生成，也不要使用我提供的这个。保证能uuid级别的唯一即可。
 
 ```ts
+import { AppEditDialogType } from './types';
+
 export const useAppOptions = () => {
   /**
    * 表格id
    */
   const tableId = '8145c521-054d-4c5c-bbdb-296528ad860c';
+
+  /**表单弹窗标题选项 */
+  const dialogTitleOptions = [
+    { label: '新增会话标签', value: AppEditDialogType.ADD },
+    { label: '编辑会话标签', value: AppEditDialogType.EDIT },
+  ];
   /**
    * tageType 用于在列表中显示不同的颜色的tag
    */
@@ -584,6 +609,7 @@ export const useAppOptions = () => {
     { label: '禁用', value: 0 },
     { label: '正常', value: 1 },
   ];
+
   const rules = {
     appName: [{ required: true, message: '应用名称不能为空', trigger: 'blur' }],
     authMode: [{ required: true, message: '鉴权模式不能为空', trigger: 'blur' }],
@@ -601,6 +627,7 @@ export const useAppOptions = () => {
     rules,
     authModeOptions,
     statusOptions,
+    dialogTitleOptions,
   };
 };
 ```
